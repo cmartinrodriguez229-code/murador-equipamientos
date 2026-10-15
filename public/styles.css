@@ -168,7 +168,7 @@ h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:upperc
 
 .products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
 .product{background:#fff;padding:13px;display:flex;flex-direction:column;min-width:0;border:1px solid #e5e2d9}
-.photo{height:190px;background:#f6f5f1;display:grid;place-items:center;position:relative}
+.photo{background:#f6f5f1;display:grid;place-items:center;position:relative}
 .photo img{max-width:100%;max-height:100%;object-fit:contain}
 
 .placeholder{font:800 50px "Bjorn";color:#d6d1c3}
