@@ -1,46 +1,31 @@
-/* Sección Superior - Fondo Gris Oscuro */
+/* Asegura el fondo gris oscuro de la sección */
 .hero {
   background: #1c1c1c !important; /* Gris oscuro idéntico al PDF */
   color: white;
-  min-height: 450px;
-  padding: 70px max(7vw, 24px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
 }
 
-.hero-inner {
-  max-width: 850px;
-  position: relative;
-  z-index: 1;
-}
-
-/* Título adaptado con colores específicos del PDF */
+/* Fuerza la tipografía Bjorn y el interlineado compacto en todo el título */
 .hero h1 {
   font-family: "Bjorn", sans-serif !important;
   font-weight: 800;
   font-size: clamp(42px, 6.5vw, 80px);
-  line-height: 1.05;
+  line-height: 1.05 !important; /* Mantiene las líneas juntas como en el PDF */
   letter-spacing: -0.01em;
   text-transform: uppercase;
   margin: 0 0 24px;
-  color: #ffffff; /* 'EQUIPAMOS' en Blanco */
+  color: #ffffff; /* Color por defecto para EQUIPAMOS */
 }
 
-/* 'TU PRESENTE' en Blanco (Color base del h1) */
+/* Clases específicas para cada línea de color */
+.hero h1 .text-white {
+  color: #ffffff !important;
+}
+
 .hero h1 .text-yellow {
-  color: #f2c400; /* Amarillo */
+  color: #f2c400 !important; /* Amarillo de tu catálogo */
 }
 
 .hero h1 .text-purple {
-  color: #7b3f97; /* Morado/Violeta del logo */
+  color: #7b3f97 !important; /* Violeta/Morado de tu logotipo */
 }
 
-.hero p:not(.kicker) {
-  max-width: 570px;
-  font-size: 16px;
-  line-height: 1.65;
-  color: #e0e0e0; /* Texto descriptivo claro */
-}
