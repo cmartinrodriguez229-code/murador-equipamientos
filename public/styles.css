@@ -142,7 +142,7 @@ nav{display:flex;gap:28px;font-size:13px;font-weight:600}
 /* 5. SECCIONES GENERALES Y CATÁLOGO */
 .catalog,.how,.contact{padding:70px max(6vw,22px)}
 .lines{padding:0}
-.lines-band{background:#1c1c1c;border-bottom:8px solid #f2c400;padding:52px max(6vw,22px)}
+.lines-band{background:#1c1c1c;border-bottom:8px solid #f2c400;padding:0 max(6vw,22px) 24px;min-height:132px;display:flex;align-items:flex-end}
 .lines-index{margin:0;color:#f2c400;font-weight:800;font-size:clamp(22px,2vw,28px);line-height:1;text-transform:uppercase}
 .lines-body{padding:36px max(6vw,22px) 64px}
 h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:uppercase}
@@ -261,7 +261,7 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
   .product{padding:8px}
   .filters{grid-template-columns:1fr}
   .catalog,.how,.contact{padding:48px 18px}
-  .lines-band{padding:36px 18px}
+  .lines-band{padding:0 18px 18px;min-height:94px}
   .lines-body{padding:28px 18px 48px}
   .linebuttons{grid-template-columns:1fr;gap:12px}
   .linebtn{min-height:0}
