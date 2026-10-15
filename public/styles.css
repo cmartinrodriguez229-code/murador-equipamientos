@@ -140,20 +140,24 @@ nav{display:flex;gap:28px;font-size:13px;font-weight:600}
 }
 
 /* 5. SECCIONES GENERALES Y CATÁLOGO */
-.lines,.catalog,.how,.contact{padding:70px max(6vw,22px)}
+.catalog,.how,.contact{padding:70px max(6vw,22px)}
+.lines{padding:0}
+.lines-band{background:#1c1c1c;border-bottom:8px solid #f2c400;padding:52px max(6vw,22px)}
+.lines-index{margin:0;color:#f2c400;font-weight:800;font-size:clamp(22px,2vw,28px);line-height:1;text-transform:uppercase}
+.lines-body{padding:36px max(6vw,22px) 64px}
 h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:uppercase}
 
 .linebuttons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
-.linebtn{position:relative;display:flex;flex-direction:column;align-items:stretch;text-align:left;min-width:0;min-height:144px;padding:20px 16px 16px 28px;background:#f7f6f1;color:#171717;border:2px solid #171717;border-radius:2px;font:inherit;cursor:pointer;overflow:hidden;transition:background .2s,color .2s,transform .2s}
-.linebtn::before{content:"";position:absolute;left:0;top:0;bottom:0;width:10px;background:#f2c400}
-.linebtn-count{align-self:flex-end;color:#7b3f97;font-weight:800;font-size:14px;letter-spacing:.02em;text-transform:uppercase;margin-bottom:6px}
-.linebtn-title{font-weight:800;font-size:clamp(17px,1.5vw,21px);line-height:1.15;text-transform:uppercase;overflow-wrap:anywhere}
+.linebtn{--t:clamp(17px,1.5vw,21px);position:relative;display:flex;flex-direction:column;align-items:stretch;text-align:left;min-width:0;min-height:144px;padding:20px 16px 16px 28px;background:#f7f6f1;color:#171717;border:1px solid #171717;border-radius:2px;font:inherit;cursor:pointer;overflow:hidden;transition:background .2s,color .2s,transform .2s}
+.linebtn::before{content:"";position:absolute;left:0;top:0;width:10px;height:calc(20px + 17px + 6px + var(--t)*1.15 + 3px);background:#f2c400}
+.linebtn-count{align-self:flex-end;color:#b04fe0;font-weight:800;font-size:14px;line-height:17px;letter-spacing:.02em;text-transform:uppercase;margin-bottom:6px}
+.linebtn-title{font-weight:800;font-size:var(--t);line-height:1.15;text-transform:uppercase;overflow-wrap:anywhere}
 .linebtn-desc{display:block;margin-top:10px;font-family:"DM Sans","Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-weight:400;font-size:13.5px;line-height:1.35;color:#7a776c}
 .linebtn:hover,.linebtn:focus-visible,.linebtn.active{background:#171717;color:#fff}
 .linebtn:hover .linebtn-desc,.linebtn:focus-visible .linebtn-desc,.linebtn.active .linebtn-desc{color:#bdb9ab}
 .linebtn:hover .linebtn-count,.linebtn:focus-visible .linebtn-count,.linebtn.active .linebtn-count{color:#d9a8f0}
 .linebtn:focus-visible{outline:3px solid #f2c400;outline-offset:2px}
-.lines-note{margin:26px 0 0;font-family:"DM Sans","Segoe UI",Roboto,Helvetica,Arial,sans-serif;max-width:720px;font-size:14px;line-height:1.6;color:#595950}
+.lines-note{margin:28px 0 0;font-weight:800;font-size:clamp(13px,1.1vw,16px);line-height:1.5;text-transform:uppercase;color:#171717}
 
 .catalog{background:#eeece5}
 .catalog-head{display:flex;justify-content:space-between;align-items:end}
@@ -256,7 +260,9 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
   .photo{height:145px}
   .product{padding:8px}
   .filters{grid-template-columns:1fr}
-  .lines,.catalog,.how,.contact{padding:48px 18px}
+  .catalog,.how,.contact{padding:48px 18px}
+  .lines-band{padding:36px 18px}
+  .lines-body{padding:28px 18px 48px}
   .linebuttons{grid-template-columns:1fr;gap:12px}
   .linebtn{min-height:0}
   .steps{grid-template-columns:1fr;gap:12px}
