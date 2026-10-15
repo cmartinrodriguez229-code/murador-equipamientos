@@ -1,5 +1,5 @@
 // MURADOR EQUIPAMIENTOS - backend del catálogo y del panel /admin sobre Cloudflare Workers + KV.
-// Datos y fotos subidas desde el panel se guardan en un único KV (binding DECANTS).
+// Datos y fotos subidas desde el panel se guardan en un único KV (binding MURADOR).
 // Las fotos originales viajan como archivos estáticos en /fotos/<id>.webp y se usan si no hay una foto subida.
 
 const PRODUCTS_KEY = "catalog:products";
@@ -58,7 +58,7 @@ async function safeEqual(a, b) {
   return diff === 0;
 }
 async function hmacKey(env) {
-  const base = env.ADMIN_SESSION_SECRET || `${env.ADMIN_USER || ""}:${env.ADMIN_PASSWORD || ""}:decants-parana`;
+  const base = env.ADMIN_SESSION_SECRET || `${env.ADMIN_USER || ""}:${env.ADMIN_PASSWORD || ""}:murador-amoblamientos`;
   return crypto.subtle.importKey("raw", enc.encode(base), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
 }
 async function sign(env, value) { return b64url(await crypto.subtle.sign("HMAC", await hmacKey(env), enc.encode(value))); }
@@ -85,7 +85,7 @@ const cookieHeader = (token, maxAge = SESSION_HOURS * 3600) =>
 
 // ---------- almacenamiento ----------
 function requireKV(env) {
-  if (!env.DECANTS) throw new HttpError(503, "Falta conectar el KV (binding DECANTS) al Worker. Revisá wrangler.jsonc y volvé a desplegar.");
+  if (!env.MURADOR) throw new HttpError(503, "Falta conectar el KV (binding MURADOR) al Worker. Revisá wrangler.jsonc y volvé a desplegar.");
 }
 async function seedFile(env, req, name) {
   const r = await env.ASSETS.fetch(new URL(`/${name}`, req.url));
@@ -104,16 +104,16 @@ const normalizeSeed = (seed) => seed.map((p) => ({
 
 async function getProducts(env, req, { persistSeed = true } = {}) {
   requireKV(env);
-  let data = await env.DECANTS.get(PRODUCTS_KEY, "json");
+  let data = await env.MURADOR.get(PRODUCTS_KEY, "json");
   if (!data) {
     data = normalizeSeed(await seedFile(env, req, "seed-products.json"));
-    if (persistSeed) await env.DECANTS.put(PRODUCTS_KEY, JSON.stringify(data));
+    if (persistSeed) await env.MURADOR.put(PRODUCTS_KEY, JSON.stringify(data));
   }
   return data;
 }
 async function getSettings(env, req) {
   requireKV(env);
-  let saved = await env.DECANTS.get(SETTINGS_KEY, "json");
+  let saved = await env.MURADOR.get(SETTINGS_KEY, "json");
   if (!saved) saved = await seedFile(env, req, "seed-settings.json").catch(() => ({}));
   return { ...defaultSettings, ...saved };
 }
@@ -152,7 +152,7 @@ async function serveImage(env, req, ctx, id) {
   let res;
   const hasVersion = new URL(req.url).searchParams.has("v");
   const cc = hasVersion ? "public, max-age=31536000, immutable" : "public, max-age=300";
-  const { value, metadata } = await env.DECANTS.getWithMetadata(IMG_PREFIX + id, "arrayBuffer");
+  const { value, metadata } = await env.MURADOR.getWithMetadata(IMG_PREFIX + id, "arrayBuffer");
   if (value) {
     res = new Response(value, { headers: { "content-type": metadata?.type || "image/webp", "cache-control": cc } });
   } else {
@@ -202,7 +202,7 @@ async function handle(req, env, ctx) {
       requireKV(env);
       const body = await req.json();
       const products = (Array.isArray(body.products) ? body.products : []).map(cleanProduct);
-      await env.DECANTS.put(PRODUCTS_KEY, JSON.stringify(products));
+      await env.MURADOR.put(PRODUCTS_KEY, JSON.stringify(products));
       return json({ ok: true, count: products.length });
     }
     if (method === "PUT" && path === "settings") {
@@ -214,7 +214,7 @@ async function handle(req, env, ctx) {
         price5: Math.max(0, Number(body.price5 ?? current.price5) || 0),
         price10: Math.max(0, Number(body.price10 ?? current.price10) || 0)
       };
-      await env.DECANTS.put(SETTINGS_KEY, JSON.stringify(next));
+      await env.MURADOR.put(SETTINGS_KEY, JSON.stringify(next));
       return json({ ok: true, settings: next });
     }
     if (method === "POST" && path.startsWith("image/")) {
@@ -225,7 +225,7 @@ async function handle(req, env, ctx) {
       const buf = await req.arrayBuffer();
       if (!buf.byteLength) return json({ error: "No se recibió una imagen." }, 400);
       if (buf.byteLength > MAX_IMAGE_BYTES) return json({ error: "La imagen supera el límite de 5 MB." }, 413);
-      await env.DECANTS.put(IMG_PREFIX + id, buf, { metadata: { type } });
+      await env.MURADOR.put(IMG_PREFIX + id, buf, { metadata: { type } });
       return json({ ok: true, url: `/api/image/${encodeURIComponent(id)}?v=${Date.now()}` });
     }
     return json({ error: "Ruta no encontrada." }, 404);
