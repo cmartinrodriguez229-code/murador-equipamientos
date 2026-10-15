@@ -238,3 +238,8 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
   footer{flex-wrap:wrap}
   .hero h1{font-size:42px}
 }
+/* --- CORRECCIÓN PARA DESPLEGAR EL PANEL DE CONSULTA --- */
+.cartpanel.active, 
+.cartpanel[style*="display: block"] {
+  display: flex !important;
+}
