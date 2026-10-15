@@ -97,9 +97,10 @@ function render() {
     <article class="product">
 
       <!-- CÓDIGO Y CATEGORÍA: AHORA ANTES DE LA FOTO -->
-      <p class="code">${esc(p.code)} · ${esc(p.category)}</p>
+ 
 
       <div class="photo">
+           <p class="code">${esc(p.code)} · ${esc(p.category)}</p>
         <img
           src="${esc(p.image || "")}"
           alt="${esc(p.name)}"
