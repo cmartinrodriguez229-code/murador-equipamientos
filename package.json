@@ -1,0 +1,14 @@
+{
+  "name": "decants-parana",
+  "version": "6.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DECANTS PARANA - catálogo y administración sobre Cloudflare Workers",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}
