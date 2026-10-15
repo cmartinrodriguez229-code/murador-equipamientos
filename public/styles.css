@@ -1,16 +1,9 @@
-/* 1. CONFIGURACIÓN LOCAL DE FUENTES (BJORN) */
+/* 1. CARGA LOCAL DE TU TIPOGRAFÍA EN FORMATO WEB OPTIMIZADO */
 @font-face {
   font-family: 'Bjorn';
-  src: url('/fonts/Bjorn-Regular.ttf') format('truetype');
+  src: url('/fonts/bjorn-regular.woff2') format('woff2'), /* Tu archivo .woff2 */
+       url('/fonts/bjorn-regular.woff') format('woff');   /* Tu archivo .woff */
   font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Bjorn';
-  src: url('/fonts/Bjorn-Light.ttf') format('truetype');
-  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
@@ -27,7 +20,7 @@ button,input,select{font:inherit}
 .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.04em}
 .brand small{display:block;font-size:10px;font-weight:300;letter-spacing:.19em}
 
-/* Control del tamaño de tu nuevo Isotipo */
+/* Control del tamaño de tu nuevo logo */
 .brand img {
   height: 43px;
   width: auto;
@@ -38,12 +31,12 @@ nav{display:flex;gap:28px;font-size:13px;font-weight:600}
 .cart{border:1px solid #171717;background:transparent;padding:10px 16px;border-radius:2px;cursor:pointer}
 .cart b{background:#7b3f97;color:white;padding:3px 7px;margin-left:8px}
 
-/* 4. SECCIÓN HERO (ESTILO PORTADA PDF) */
+/* 4. SECCIÓN HERO (ESTILO PORTADA PDF - GRIS OSCURO) */
 .hero{background:#1c1c1c !important;min-height:450px;padding:70px max(7vw,24px);display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
 .hero-inner{max-width:850px;position:relative;z-index:1}
 .kicker{font-size:11px;letter-spacing:.19em;font-weight:800;margin:0 0 14px}
 
-/* Título principal con Bjorn e interlineado compacto */
+/* Título principal con Bjorn real e interlineado compacto */
 .hero h1{font:800 clamp(42px,6.5vw,80px)/1.05 "Bjorn",sans-serif !important;letter-spacing:-.01em;margin:0 0 24px;color:#ffffff;text-transform:uppercase}
 
 /* Clases de colores para las líneas del h1 */
@@ -145,4 +138,3 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
   footer{flex-wrap:wrap}
   .hero h1{font-size:46px}
 }
-
