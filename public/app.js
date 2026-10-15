@@ -113,7 +113,7 @@ function render() {
           aria-label="Favorito"
         >${favs.includes(p.id) ? "♥" : "♡"}</button>
       </div>
-<p class="meta">${esc(p.category)}</p>
+<p class="code2">${esc(p.category)}</p>
       <h3>${esc(p.name)}</h3>
       <p class="meta">${esc(p.brand)}</p>
       <p class="desc">${esc(p.description || "Consultanos por especificaciones, precio y disponibilidad.")}</p>
