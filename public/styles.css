@@ -287,3 +287,76 @@ h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:upperc
 .steps p,.contact p{line-height:1.7;color:#aaa}
 
 .contact{display:flex;align-items:center;justify-content:space-between;gap:25px}
+.contact>div{max-width:650px}
+.contact p:not(.kicker){color:#555}
+.contact .kicker{color:#756600}
+
+/* 7. PIE DE PÁGINA */
+footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-content:space-between;gap:15px;font-size:12px;align-items:center}
+
+/* 8. PANEL DE CONSULTA (CARRITO) */
+.cartpanel{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;justify-content:flex-end}
+.cartpanel[hidden]{display:none !important}
+.cartbox{width:min(460px,100%);height:100%;background:#f7f6f1;padding:35px;overflow:auto}
+.close{float:right;border:0;background:none;font-size:32px;cursor:pointer}
+.cartrow{padding:12px 0;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;gap:12px}
+.cartrow button{border:0;background:none;cursor:pointer;color:#a00}
+img{max-width:100%}
+
+/* 9. RESPONSIVE / ADAPTACIÓN MÓVIL */
+@media(max-width:1200px){
+  .linebuttons{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+@media(max-width:900px){
+  .linebuttons{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .filters{grid-template-columns:1fr 1fr}
+  .filters input{grid-column:1/-1}
+  nav{gap:18px}
+}
+
+@media(max-width:850px){
+  .hero{flex-direction:column;min-height:auto;background:#1c1c1c !important}
+  .hero-inner{max-width:100%;clip-path:none;padding:48px 24px}
+  .hero-stamp{max-width:100%;background:#f2c400;padding:45px 24px}
+  .hero-stamp img{width:200px}
+}
+
+@media(max-width:700px){
+  .top{height:66px;padding:0 16px;gap:10px}
+  .brand img{height:36px}
+  .brand{gap:8px;min-width:0}
+  nav{display:none}
+  .cart{padding:8px 12px;white-space:nowrap}
+  .catalog,.how,.contact{padding:48px 18px}
+  .catalog-head{flex-direction:column;align-items:flex-start;gap:8px}
+  .lines-band{padding:0 18px 18px;min-height:94px}
+  .lines-body{padding:28px 18px 48px}
+  .linebuttons{grid-template-columns:1fr;gap:12px}
+  .linebtn{min-height:0}
+  .filters{grid-template-columns:1fr;margin:20px 0}
+  .steps{grid-template-columns:1fr;gap:12px}
+  .contact{align-items:flex-start;flex-direction:column}
+  .contact .btn{width:100%;text-align:center}
+  footer{flex-direction:column;align-items:flex-start}
+  .hero h1{font-size:42px}
+  .cartbox{padding:24px 18px}
+}
+
+/* catálogo en celular: 2 columnas compactas */
+@media(max-width:640px){
+  .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;justify-content:stretch}
+  .product{padding:8px}
+  .photo{height:auto;aspect-ratio:1/1;margin-bottom:10px}
+  .code{top:6px;left:6px;font-size:10px;padding:5px 9px;max-width:calc(100% - 56px)}
+  .heart{width:30px;height:30px;font-size:17px;right:6px;top:6px}
+  .code2{font-size:11px;padding:5px 8px;border-left-width:6px;overflow-wrap:anywhere}
+  .product h3{font-size:15px;line-height:1.1;overflow-wrap:anywhere}
+  .meta{font-size:11px;overflow-wrap:anywhere}
+  .desc{font-size:11px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .actions{flex-direction:column;gap:5px;margin-top:10px}
+  .actions button{padding:10px 4px;font-size:10px}
+}
+@media(max-width:340px){
+  .products{grid-template-columns:1fr}
+}

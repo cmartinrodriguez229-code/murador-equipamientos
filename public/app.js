@@ -1,13 +1,15 @@
 
 const $ = s => document.querySelector(s);
 
-const LINE_NAMES = [
-  "Industrial",
-  "Hogar",
-  "Exterior y Tiempo Libre",
-  "Tecnología",
-  "Herramientas y Mantenimiento"
+// Secciones por defecto (solo si la API no responde); en producción vienen del admin.
+const DEFAULT_SECTIONS = [
+  { name: "Industrial", categories: ["Gestión y venta", "Cocción", "Elaboración y procesamiento", "Frío y exhibición", "Mobiliario e infraestructura", "Envasado"] },
+  { name: "Hogar", categories: ["Cocina", "Frío", "Lavado", "Pequeños electrodomésticos", "Climatización", "Audio y video", "Muebles", "Descanso"] },
+  { name: "Exterior y Tiempo Libre", categories: ["Movilidad", "Jardín y parque", "Limpieza"] },
+  { name: "Tecnología", categories: ["Consolas", "Informática", "Telefonía"] },
+  { name: "Herramientas y Mantenimiento", categories: ["Herramientas eléctricas", "Aire comprimido"] }
 ];
+let sections = DEFAULT_SECTIONS;
 
 let all = [],
     cart = [],
@@ -29,6 +31,7 @@ async function load() {
     if (!r.ok) throw 0;
     let d = await r.json();
     all = d.products || [];
+    if (d.taxonomy && Array.isArray(d.taxonomy.sections) && d.taxonomy.sections.length) sections = d.taxonomy.sections;
   } catch {
     let r = await fetch("/seed-products.json");
     all = await r.json();
@@ -39,26 +42,20 @@ async function load() {
   render();
 }
 
-const LINE_DESC = {
-  "Industrial": "Gestión y venta · Cocción · Elaboración y procesamiento · Frío y exhibición · Mobiliario e infraestructura · Envasado",
-  "Hogar": "Cocina · Frío · Lavado · Pequeños electrodomésticos · Climatización · Audio y video · Muebles · Descanso",
-  "Exterior y Tiempo Libre": "Movilidad · Jardín y parque · Limpieza",
-  "Tecnología": "Consolas · Informática · Telefonía",
-  "Herramientas y Mantenimiento": "Herramientas eléctricas · Aire comprimido"
-};
-
 function renderLines() {
-  $("#lineButtons").innerHTML = LINE_NAMES.map(l => `
-    <button type="button" class="linebtn" data-line="${esc(l)}">
-      <span class="linebtn-count">${all.filter(p => p.line === l).length} EQUIPOS</span>
-      <span class="linebtn-title">${esc(l)}</span>
-      <span class="linebtn-desc">${esc(LINE_DESC[l] || "")}</span>
+  const visible = all.filter(p => p.visible !== false);
+  $("#lineButtons").innerHTML = sections.map(sec => `
+    <button type="button" class="linebtn" data-line="${esc(sec.name)}">
+      <span class="linebtn-count">${visible.filter(p => p.line === sec.name).length} EQUIPOS</span>
+      <span class="linebtn-title">${esc(sec.name)}</span>
+      <span class="linebtn-desc">${esc((sec.categories || []).filter(c => c.toLowerCase() !== "por clasificar").join(" · "))}</span>
     </button>
   `).join("");
 
   $("#lineButtons").querySelectorAll("button").forEach(b => {
     b.onclick = () => {
       $("#lineFilter").value = b.dataset.line;
+      $("#categoryFilter").value = "";
       render();
       $("#catalogo").scrollIntoView();
     };
@@ -66,15 +63,15 @@ function renderLines() {
 }
 
 function populate() {
-  const opts = (id, values, label) => {
+  const opts = (id, values, label, keepOrder) => {
     $(id).innerHTML = `<option value="">${label}</option>` +
       [...new Set(values.filter(Boolean))]
-        .sort()
+        .sort((a, b) => keepOrder ? 0 : a.localeCompare(b, "es"))
         .map(v => `<option>${esc(v)}</option>`)
         .join("");
   };
 
-  opts("#lineFilter", all.map(p => p.line), "Todas las líneas");
+  opts("#lineFilter", sections.map(x => x.name), "Todas las líneas", true);
   opts("#categoryFilter", all.map(p => p.category), "Todas las categorías");
   opts("#brandFilter", all.map(p => p.brand), "Todas las marcas");
 }

@@ -1,3 +1,163 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin · Murador Equipamientos</title><link rel="stylesheet" href="/styles.css"><style>body{padding:24px}.admin{max-width:1000px;margin:auto}.panel{background:white;padding:22px;margin:18px 0;border:1px solid #ddd}input,textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #ccc}textarea{min-height:55vh;font:13px monospace}.btn{margin:6px 6px 6px 0}.hidden{display:none}</style></head><body><div class="admin"><a href="/">← Volver al catálogo</a><h1>ADMINISTRACIÓN MURADOR</h1><section id="login" class="panel"><h2>Acceso administrador</h2><input id="user" placeholder="Usuario" autocomplete="username"><input id="pass" type="password" placeholder="Contraseña" autocomplete="current-password"><button id="loginBtn" class="btn dark">INGRESAR</button><p id="msg"></p></section><section id="editor" class="panel hidden"><h2>Catálogo de productos (JSON)</h2><p>Podés editar códigos, nombres, marcas, líneas, categorías, descripciones, fotos y visibilidad. Conservá el formato JSON.</p><textarea id="data"></textarea><button id="save" class="btn dark">GUARDAR CATÁLOGO</button><button id="logout" class="btn yellow">CERRAR SESIÓN</button><p id="status"></p></section></div><script>
-const $=s=>document.querySelector(s);async function api(path,opts={}){return fetch("/api/"+path,{credentials:"same-origin",headers:{"content-type":"application/json",...(opts.headers||{})},...opts})}
-async function check(){let r=await api("session");let d=await r.json();if(d.authenticated)openEditor()}function openEditor(){$("#login").classList.add("hidden");$("#editor").classList.remove("hidden");load()}async function load(){let r=await api("admin");let d=await r.json();$("#data").value=JSON.stringify(d.products,null,2)}$("#loginBtn").onclick=async()=>{let r=await api("login",{method:"POST",body:JSON.stringify({username:$("#user").value,password:$("#pass").value})});let d=await r.json();if(!r.ok){$("#msg").textContent=d.error||"No se pudo ingresar";return}openEditor()};$("#save").onclick=async()=>{try{let products=JSON.parse($("#data").value);let r=await api("products",{method:"PUT",body:JSON.stringify({products})});let d=await r.json();$("#status").textContent=r.ok?"Guardado: "+d.count+" productos":(d.error||"Error al guardar")}catch(e){$("#status").textContent="JSON inválido: "+e.message}};$("#logout").onclick=async()=>{await api("logout",{method:"POST"});location.reload()};check();</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin · Murador Equipamientos</title>
+<link rel="icon" href="/logo.png">
+<link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+
+<!-- ACCESO -->
+<main id="login" class="login">
+  <form id="loginForm" class="login-card" autocomplete="on">
+    <a class="back" href="/">← Volver al catálogo</a>
+    <h1>Administración Murador</h1>
+    <h2>Acceso administrador</h2>
+    <label>Usuario<input id="user" name="username" autocomplete="username" required></label>
+    <label>Contraseña<input id="pass" name="password" type="password" autocomplete="current-password" required></label>
+    <button class="btn dark" type="submit">Ingresar</button>
+    <p id="loginMsg" class="msg" role="alert"></p>
+  </form>
+</main>
+
+<!-- PANEL -->
+<div id="app" hidden>
+  <header class="top">
+    <div class="brand">
+      <img src="/logo.png" alt="">
+      <div><strong>MURADOR EQUIPAMIENTOS</strong><span>Panel de administración</span></div>
+    </div>
+    <div class="top-actions">
+      <a class="btn" href="/" target="_blank" rel="noopener">Ver sitio</a>
+      <button class="btn" id="logout" type="button">Salir</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="products" role="tab" type="button">Artículos</button>
+    <button class="tab" data-tab="taxonomy" role="tab" type="button">Secciones y categorías</button>
+  </nav>
+
+  <!-- barra de guardado -->
+  <div class="savebar" id="savebar">
+    <span id="status" class="status" role="status">Todo guardado</span>
+    <button class="btn dark" id="saveAll" type="button">Guardar cambios</button>
+  </div>
+
+  <!-- ARTÍCULOS -->
+  <section id="tab-products" class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Artículos</h2>
+        <p id="counts" class="muted"></p>
+      </div>
+      <button class="btn dark" id="newProduct" type="button">+ Nuevo artículo</button>
+    </div>
+
+    <div class="filters">
+      <input id="q" type="search" placeholder="Buscar por código, nombre o marca…">
+      <select id="fSection"><option value="">Todas las secciones</option></select>
+      <select id="fCategory"><option value="">Todas las categorías</option></select>
+      <select id="fVisible">
+        <option value="">Visibles y ocultos</option>
+        <option value="1">Solo visibles</option>
+        <option value="0">Solo ocultos</option>
+      </select>
+    </div>
+
+    <div class="table" id="table" role="table">
+      <div class="row head" role="row">
+        <span role="columnheader">Mostrar</span>
+        <span role="columnheader">Foto</span>
+        <span role="columnheader">Artículo</span>
+        <span role="columnheader">Sección / categoría</span>
+        <span role="columnheader">Marca</span>
+        <span role="columnheader"></span>
+      </div>
+      <div id="rows"></div>
+    </div>
+    <p id="empty" class="muted center" hidden>No hay artículos con esos filtros.</p>
+  </section>
+
+  <!-- SECCIONES Y CATEGORÍAS -->
+  <section id="tab-taxonomy" class="panel" hidden>
+    <div class="panel-head">
+      <div>
+        <h2>Secciones y categorías</h2>
+        <p class="muted">Las secciones son las tarjetas de “Qué vas a encontrar”. Las categorías se listan debajo del nombre.</p>
+      </div>
+    </div>
+    <div id="sections"></div>
+    <form id="addSection" class="inline-add">
+      <input id="newSectionName" placeholder="Nombre de la nueva sección" maxlength="80">
+      <button class="btn dark" type="submit">+ Agregar sección</button>
+    </form>
+  </section>
+</div>
+
+<!-- FORMULARIO DE ARTÍCULO -->
+<dialog id="dlg">
+  <form id="productForm" method="dialog" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlgTitle">Nuevo artículo</h2>
+      <button class="btn sm" id="closeDlg" type="button">Cerrar</button>
+    </div>
+
+    <div class="formlayout">
+      <div class="imgcol">
+        <div class="imgprev" id="imgPrev"><span>Sin imagen</span></div>
+        <input id="fFile" type="file" accept="image/*" hidden>
+        <button class="btn" id="pickImg" type="button">Subir imagen…</button>
+        <button class="btn danger-o" id="rmImg" type="button">Quitar imagen</button>
+        <small class="muted">JPG, PNG o WebP. Se optimiza sola al subir.</small>
+      </div>
+
+      <div class="fields">
+        <div class="grid2">
+          <label>Sección
+            <select id="fSec" required></select>
+          </label>
+          <label>Categoría
+            <select id="fCat"></select>
+          </label>
+        </div>
+
+        <div class="grid2">
+          <label>Código
+            <input id="fCode" placeholder="IND-01" maxlength="40" required>
+          </label>
+          <label>Marca
+            <input id="fBrand" placeholder="Systel · Croma" maxlength="120">
+          </label>
+        </div>
+
+        <label>Nombre
+          <input id="fName" placeholder="Balanza comercial" maxlength="160" required>
+        </label>
+
+        <label>Descripción
+          <textarea id="fDesc" rows="3" maxlength="1500" placeholder="Croma 31kg Torre PPI Visor LED"></textarea>
+        </label>
+
+        <label class="check">
+          <input id="fVisibleChk" type="checkbox" checked>
+          <span>Mostrar este artículo en el sitio</span>
+        </label>
+      </div>
+    </div>
+
+    <p id="formErr" class="msg" role="alert"></p>
+
+    <div class="dlg-actions">
+      <button class="btn" id="cancelDlg" type="button">Cancelar</button>
+      <button class="btn dark" id="okDlg" type="submit">Aceptar</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/admin.js"></script>
+</body>
+</html>
