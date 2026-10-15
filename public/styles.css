@@ -1,4 +1,3 @@
-
 /* 1. CARGA LOCAL CON LOS NOMBRES EXACTOS DE TU REPOSITORIO */
 @font-face {
   font-family: 'Bjorn';
@@ -8,7 +7,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 
 /* 2. ESTILOS GENERALES */
 *{box-sizing:border-box}
@@ -33,13 +31,48 @@ nav{display:flex;gap:28px;font-size:13px;font-weight:600}
 .cart{border:1px solid #171717;background:transparent;padding:10px 16px;border-radius:2px;cursor:pointer}
 .cart b{background:#7b3f97;color:white;padding:3px 7px;margin-left:8px}
 
-/* 4. SECCIÓN HERO (ESTILO PORTADA PDF - GRIS OSCURO) */
-.hero{background:#1c1c1c !important;min-height:450px;padding:70px max(7vw,24px);display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
-.hero-inner{max-width:850px;position:relative;z-index:1}
-.kicker{font-size:11px;letter-spacing:.19em;font-weight:800;margin:0 0 14px}
+/* 4. SECCIÓN HERO (DIAGONAL BIPARTITA) */
+.hero {
+  background: #f2c400 !important; /* Fondo amarillo base del lado derecho */
+  min-height: 520px;
+  padding: 0 !important;
+  display: flex;
+  align-items: stretch; /* Estira ambos bloques por igual */
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
 
-/* Título principal con Bjorn real e interlineado compacto */
-.hero h1{font:800 clamp(42px,6.5vw,80px)/1.05 "Bjorn",sans-serif !important;letter-spacing:-.01em;margin:0 0 24px;color:#ffffff;text-transform:uppercase}
+/* Bloque Izquierdo - Contenedor Gris Oscuro */
+.hero-inner {
+  background: #1c1c1c;
+  flex: 1;
+  max-width: 55%; /* Ocupa un poco más de la mitad de la pantalla */
+  padding: 70px max(4vw, 24px) 70px max(7vw, 24px);
+  position: relative;
+  z-index: 2;
+  /* Efecto de corte diagonal */
+  clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
+}
+
+/* Texto superior 'CATÁLOGO GENERAL' en Amarillo */
+.hero .kicker-yellow {
+  color: #f2c400 !important;
+  font-family: "Bjorn", sans-serif !important;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.35em !important; /* Letras bien separadas */
+  text-transform: uppercase;
+  margin: 0 0 28px;
+}
+
+/* Título principal con Bjorn e interlineado compacto */
+.hero h1 {
+  font: 800 clamp(38px, 5.5vw, 72px)/1.05 "Bjorn", sans-serif !important;
+  letter-spacing: -0.01em;
+  margin: 0 0 24px;
+  text-transform: uppercase;
+}
 
 /* Clases de colores para las líneas del h1 */
 .hero h1 .text-white {
@@ -52,13 +85,59 @@ nav{display:flex;gap:28px;font-size:13px;font-weight:600}
   color: #7b3f97 !important;
 }
 
-.hero p:not(.kicker){max-width:570px;font-size:16px;line-height:1.65;color:#e0e0e0}
-.btn{display:inline-block;border:0;padding:15px 22px;font-weight:800;font-size:12px;letter-spacing:.06em;cursor:pointer}
-.dark{background:#171717;color:white;margin-top:16px}
-.yellow{background:#7b3f97;color:white}
+.hero p:not(.kicker-yellow) {
+  max-width: 480px; /* Evita que el texto pise el área de la diagonal */
+  font-size: 15px;
+  line-height: 1.6;
+  color: #e0e0e0;
+}
 
-.hero-stamp{font:800 190px/.7 "Bjorn";color:rgba(255,255,255,.04);text-align:center;margin-right:4vw;transform:rotate(-8deg)}
-.hero-stamp small{font:300 14px "Bjorn";letter-spacing:.25em}
+.btn {
+  display: inline-block;
+  border: 0;
+  padding: 15px 22px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: .06em;
+  cursor: pointer;
+}
+.dark {
+  background:#171717;
+  color:white;
+  margin-top:16px;
+}
+.yellow {
+  background:#7b3f97;
+  color:white;
+}
+
+/* Bloque Derecho - El Contenedor Amarillo Nítido con tu Logotipo */
+.hero-stamp {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px max(5vw, 24px);
+  position: relative;
+  z-index: 1;
+  max-width: 45%;
+  opacity: 1 !important; /* Completamente visible y nítido */
+  transform: none !important; /* Sin inclinaciones raras en el contenedor */
+}
+
+/* Ajuste del logotipo gigante dentro del bloque amarillo */
+.hero-stamp img {
+  width: min(280px, 85%);
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 0;
+}
+
+/* Oculta los textos alternativos del viejo sello del HTML */
+.hero-stamp span, .hero-stamp small {
+  display: none !important;
+}
 
 /* 5. SECCIONES GENERALES Y CATÁLOGO */
 .lines,.catalog,.how,.contact{padding:70px max(6vw,22px)}
@@ -123,13 +202,32 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
   .linebuttons{grid-template-columns:repeat(2,1fr)}
   .products{grid-template-columns:repeat(3,minmax(0,1fr))}
   .filters{grid-template-columns:1fr 1fr}
-  .hero-stamp{display:none}
+}
+
+@media(max-width:850px){
+  .hero {
+    flex-direction: column;
+    min-height: auto;
+    background: #1c1c1c !important; /* El fondo base de la cabecera móvil pasa a ser gris */
+  }
+  .hero-inner {
+    max-width: 100%;
+    clip-path: none; /* Desactivamos el corte diagonal en pantallas chicas por legibilidad */
+    padding: 48px 24px;
+  }
+  .hero-stamp {
+    max-width: 100%;
+    background: #f2c400; /* El bloque amarillo se sitúa ordenadamente abajo */
+    padding: 45px 24px;
+  }
+  .hero-stamp img {
+    width: 200px;
+  }
 }
 
 @media(max-width:600px){
   .top{height:66px}
   nav{display:none}
-  .hero{padding-top:55px;padding-bottom:55px}
   .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .photo{height:145px}
   .product{padding:8px}
@@ -138,55 +236,5 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
   .steps{grid-template-columns:1fr;gap:12px}
   .contact{align-items:flex-start;flex-direction:column}
   footer{flex-wrap:wrap}
-  .hero h1{font-size:46px}
-}
-
-/* --- NUEVOS AJUSTES PARA LA PORTADA --- */
-
-/* 1. Color amarillo y separación de letras para el Kicker */
-.hero .kicker-yellow {
-  color: #f2c400 !important; /* Amarillo del catálogo */
-  font-family: "Bjorn", sans-serif !important;
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.35em !important; /* Letras bien separadas */
-  text-transform: uppercase;
-  margin: 0 0 28px;
-}
-
-/* 2. Controlar el tamaño del logo de la derecha para que actúe como un sello sutil */
-.hero-stamp {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 180px; /* Hace el logo de la derecha mucho más chico */
-  opacity: 0.06; /* Lo vuelve súper translúcido como marca de agua */
-  transform: rotate(-8deg); /* Le da la inclinación original del catálogo */
-  margin-right: max(2vw, 20px);
-}
-
-/* Ajusta la imagen interna del sello */
-.hero-stamp img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  margin-bottom: 8px;
-}
-
-/* Ajusta el texto interno del sello */
-.hero-stamp span {
-  font-family: "Bjorn", sans-serif;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-align: center;
-  color: #ffffff;
-}
-
-.hero-stamp small {
-  display: block;
-  font-weight: 300;
-  font-size: 8px;
-  letter-spacing: 0.15em;
+  .hero h1{font-size:42px}
 }
