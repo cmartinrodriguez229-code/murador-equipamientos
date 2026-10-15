@@ -14,8 +14,8 @@
   },
   "kv_namespaces": [
     {
-      "binding": "DECANTS",
-      "id": "REEMPLAZAR_CON_ID_KV_MURADOR"
+    "binding": "MURADOR",
+      "id": "fc6216f1301045ed819a7df22b9d0ace"
     }
   ]
 }
