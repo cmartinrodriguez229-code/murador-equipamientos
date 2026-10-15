@@ -1,9 +1,10 @@
-/* Definición local de la tipografía Bjorn */
+/* Declaración local de la tipografía Bjorn */
 @font-face {
   font-family: 'Bjorn';
   src: url('/fonts/Bjorn-Regular.ttf') format('truetype');
   font-weight: 800;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -11,6 +12,7 @@
   src: url('/fonts/Bjorn-Light.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
+  font-display: swap;
 }
 
 *{box-sizing:border-box}
@@ -21,11 +23,11 @@ button,input,select{font:inherit}
 
 .top{height:78px;padding:0 max(5vw,22px);display:flex;align-items:center;justify-content:space-between;background:#f7f6f1;border-bottom:1px solid #ddd9cd;position:sticky;top:0;z-index:10}
 
-/* Estilos de la marca con Bjorn */
+/* Ajustes de marca a la fuente Bjorn */
 .brand{display:flex;align-items:center;gap:11px;font-family:"Bjorn", sans-serif;font-weight:800;letter-spacing:.04em}
 .brand small{display:block;font-size:10px;font-weight:300;letter-spacing:.19em}
 
-/* Reemplazo del isotipo recortado amarillo por la imagen de tu nuevo logo */
+/* Control del tamaño y centrado del nuevo logo img en el encabezado */
 .brand img {
   height: 43px;
   width: auto;
@@ -36,12 +38,12 @@ nav{display:flex;gap:28px;font-size:13px;font-weight:600}
 .cart{border:1px solid #171717;background:transparent;padding:10px 16px;border-radius:2px;cursor:pointer}
 .cart b{background:#7b3f97;color:white;padding:3px 7px;margin-left:8px}
 
-/* Color de fondo modificado al violeta del logo */
+/* Color del fondo hero cambiado al violeta corporativo */
 .hero{background:#7b3f97;color:white;min-height:450px;padding:70px max(7vw,24px);display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
 .hero-inner{max-width:850px;position:relative;z-index:1}
 .kicker{font-size:11px;letter-spacing:.19em;font-weight:800;margin:0 0 14px}
 
-/* Título adaptado a Bjorn */
+/* Encabezados estilizados con Bjorn */
 .hero h1{font:800 clamp(42px,7vw,88px)/.95 "Bjorn",sans-serif;letter-spacing:-.01em;margin:0 0 24px}
 .hero h1 span{color:#f7f6f1}
 .hero p:not(.kicker){max-width:570px;font-size:16px;line-height:1.65;color:#f3f0e7}
