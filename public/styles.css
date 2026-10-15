@@ -243,3 +243,14 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
 .cartpanel[style*="display: block"] {
   display: flex !important;
 }
+
+
+
+/* --- EN LA PARTE INFERIOR DE TU STYLES.CSS --- */
+
+
+/* Cuando el elemento tiene el atributo hidden en el HTML, se oculta correctamente */
+.cartpanel[hidden] {
+  display: none !important;
+}
+
