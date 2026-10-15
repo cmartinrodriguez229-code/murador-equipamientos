@@ -12,7 +12,6 @@ const DEFAULT_SECTIONS = [
 let sections = DEFAULT_SECTIONS;
 
 let all = [],
-    cart = [],
     favs = JSON.parse(localStorage.getItem("murador_favs") || "[]");
 
 const wa = "5493434627755";
@@ -40,6 +39,7 @@ async function load() {
   renderLines();
   populate();
   render();
+  renderFavs();
 }
 
 function renderLines() {
@@ -99,6 +99,9 @@ function render() {
       <div class="photo">
            <p class="code">${esc(p.code)}</p>
         <img
+          class="zoomable"
+          tabindex="0"
+          role="button"
           src="${esc(p.image || "")}"
           alt="${esc(p.name)}"
           onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
@@ -116,99 +119,112 @@ function render() {
       <p class="desc">${esc(p.description || "Consultanos por especificaciones, precio y disponibilidad.")}</p>
 
       <div class="actions">
-        <button class="consult" data-add="${esc(p.id)}">CONSULTAR</button>
-        <button data-add="${esc(p.id)}">+ CONSULTA</button>
+        <button class="consult" data-wa="${esc(p.id)}">CONSULTAR PRECIO</button>
       </div>
 
     </article>
   `).join("");
 
   $("#products").querySelectorAll("[data-fav]").forEach(b => {
-    b.onclick = () => {
-      let id = b.dataset.fav;
-
-      favs = favs.includes(id)
-        ? favs.filter(x => x !== id)
-        : [...favs, id];
-
-      localStorage.setItem("murador_favs", JSON.stringify(favs));
-      render();
-    };
+    b.onclick = () => toggleFav(b.dataset.fav);
   });
 
-  $("#products").querySelectorAll("[data-add]").forEach(b => {
+  $("#products").querySelectorAll("[data-wa]").forEach(b => {
     b.onclick = () => {
-      let p = all.find(x => x.id === b.dataset.add);
-
+      const p = all.find(x => x.id === b.dataset.wa);
       if (!p) return;
-
-      if (!cart.some(x => x.id === p.id)) cart.push(p);
-
-      cartCount();
-
-      if (b.classList.contains("consult")) {
-        window.open(
-          "https://wa.me/" + wa + "?text=" +
-          encodeURIComponent("Hola Murador, quisiera consultar por " + p.code + " — " + p.name),
-          "_blank"
-        );
-      }
+      window.open(
+        "https://wa.me/" + wa + "?text=" +
+        encodeURIComponent("Hola Murador Equipamientos, quisiera consultar por precio y disponibilidad de " + p.code + " — " + p.name),
+        "_blank", "noopener"
+      );
     };
   });
 }
 
-function cartCount() {
-  $("#cartCount").textContent = cart.length;
+/* ---------- FAVORITOS ---------- */
+function saveFavs() {
+  localStorage.setItem("murador_favs", JSON.stringify(favs));
+}
 
-  $("#cartItems").innerHTML = cart.length
-    ? cart.map(p => `
-        <div class="cartrow">
-          <span><b>${esc(p.code)}</b> — ${esc(p.name)}</span>
-          <button data-remove="${esc(p.id)}">Quitar</button>
+function toggleFav(id) {
+  favs = favs.includes(id) ? favs.filter(x => x !== id) : [...favs, id];
+  saveFavs();
+  render();
+  renderFavs();
+}
+
+function renderFavs() {
+  const items = favs.map(id => all.find(p => p.id === id)).filter(Boolean);
+  $("#favCount").textContent = items.length;
+
+  $("#favItems").innerHTML = items.length
+    ? items.map(p => `
+        <div class="favrow">
+          <div class="favthumb">${p.image ? `<img src="${esc(p.image)}" alt="" onerror="this.remove()">` : ""}</div>
+          <div class="favinfo">
+            <b>${esc(p.name)}</b>
+            <small>${esc(p.code)}</small>
+          </div>
+          <button class="favremove" data-remove="${esc(p.id)}" aria-label="Quitar ${esc(p.name)} de favoritos">×</button>
         </div>
       `).join("")
-    : "Todavía no agregaste productos.";
+    : '<p class="favempty">Todavía no marcaste favoritos. Tocá el corazón de un artículo para guardarlo acá.</p>';
 
-  $("#cartItems").querySelectorAll("[data-remove]").forEach(b => {
-    b.onclick = () => {
-      cart = cart.filter(p => p.id !== b.dataset.remove);
-      cartCount();
-    };
+  $("#favItems").querySelectorAll("[data-remove]").forEach(b => {
+    b.onclick = () => toggleFav(b.dataset.remove);
   });
 }
 
-["#search", "#lineFilter", "#categoryFilter", "#brandFilter"].forEach(s => {
-  $(s).addEventListener(
-    s === "#search" ? "input" : "change",
-    render
-  );
+function openFavs() {
+  renderFavs();
+  $("#favPanel").hidden = false;
+  document.body.classList.add("modal-open");
+}
+function closeFavs() {
+  $("#favPanel").hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+$("#favOpen").onclick = openFavs;
+$("#favClose").onclick = closeFavs;
+$("#favPanel").onclick = e => { if (e.target.id === "favPanel") closeFavs(); };
+
+/* ---------- FOTO AMPLIADA ---------- */
+function openLightbox(src, alt) {
+  $("#lbImg").src = src;
+  $("#lbImg").alt = alt || "";
+  $("#lightbox").hidden = false;
+  document.body.classList.add("modal-open");
+  $("#lbClose").focus();
+}
+function closeLightbox() {
+  $("#lightbox").hidden = true;
+  $("#lbImg").removeAttribute("src");
+  document.body.classList.remove("modal-open");
+}
+
+$("#products").addEventListener("click", e => {
+  const img = e.target.closest("img.zoomable");
+  if (img && img.getAttribute("src")) openLightbox(img.currentSrc || img.src, img.alt);
+});
+$("#products").addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches("img.zoomable")) {
+    e.preventDefault();
+    openLightbox(e.target.currentSrc || e.target.src, e.target.alt);
+  }
+});
+$("#lbClose").onclick = closeLightbox;
+$("#lightbox").onclick = e => { if (e.target.id === "lightbox") closeLightbox(); };
+
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("#lightbox").hidden) closeLightbox();
+  else if (!$("#favPanel").hidden) closeFavs();
 });
 
-$("#cartOpen").onclick = () => {
-  $("#cartPanel").hidden = false;
-  cartCount();
-};
-
-$("#cartClose").onclick = () => {
-  $("#cartPanel").hidden = true;
-};
-
-$("#cartPanel").onclick = e => {
-  if (e.target.id === "cartPanel") {
-    $("#cartPanel").hidden = true;
-  }
-};
-
-$("#sendCart").onclick = () => {
-  if (!cart.length) return alert("Agregá al menos un producto.");
-
-  let msg = "Hola Murador, quisiera consultar precio, disponibilidad y financiación de:\n" +
-    cart.map(p => p.code + " — " + p.name).join("\n");
-
-  window.open(
-    "https://wa.me/" + wa + "?text=" + encodeURIComponent(msg),
-    "_blank"
-  );
-};
+["#search", "#lineFilter", "#categoryFilter", "#brandFilter"].forEach(s => {
+  $(s).addEventListener(s === "#search" ? "input" : "change", render);
+});
 
 load();

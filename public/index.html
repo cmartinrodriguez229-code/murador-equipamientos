@@ -24,7 +24,10 @@
         <a href="#comprar">Cómo comprar</a>
         <a href="#contacto">Contacto</a>
     </nav>
-    <button id="cartOpen" class="cart">Consulta <b id="cartCount">0</b></button>
+    <button id="favOpen" class="cart" type="button" aria-label="Abrir favoritos">
+        <svg class="heart-ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="cart-label">Favoritos</span> <b id="favCount">0</b>
+    </button>
 </header>
 <main id="inicio">
    <section class="hero">
@@ -94,15 +97,18 @@
     <span>Equipamos tu presente. Impulsamos tu futuro.</span>
     <a href="/admin.html">Administración</a>
 </footer>
-<div id="cartPanel" class="cartpanel" hidden>
-
-    <div class="cartbox">
-        <button id="cartClose" class="close">×</button>
-        <p class="kicker">TU CONSULTA</p>
-        <h2>Productos seleccionados</h2>
-        <div id="cartItems"></div>
-        <button id="sendCart" class="btn yellow">ENVIAR CONSULTA POR WHATSAPP</button>
+<div id="favPanel" class="cartpanel" hidden>
+    <div class="cartbox" role="dialog" aria-modal="true" aria-labelledby="favTitle">
+        <button id="favClose" class="close" type="button" aria-label="Cerrar">×</button>
+        <p class="kicker">TU LISTA</p>
+        <h2 id="favTitle">Favoritos</h2>
+        <div id="favItems"></div>
     </div>
+</div>
+
+<div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Foto ampliada">
+    <button id="lbClose" class="lb-close" type="button" aria-label="Cerrar">×</button>
+    <img id="lbImg" alt="">
 </div>
 <script src="/app.js"></script>
 </body>
