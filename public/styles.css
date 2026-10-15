@@ -250,6 +250,17 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
 
 
 /* Cuando el elemento tiene el atributo hidden en el HTML, se oculta correctamente */
+/* --- EN LA PARTE INFERIOR DE TU STYLES.CSS --- */
+.cartpanel {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  display: flex; /* Deja que el contenedor use flex nativo */
+  justify-content: flex-end;
+}
+
+/* Cuando el elemento tiene el atributo hidden en el HTML, se oculta correctamente */
 .cartpanel[hidden] {
   display: none !important;
 }
