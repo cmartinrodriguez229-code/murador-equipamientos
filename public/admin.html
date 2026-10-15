@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Administración · DECANTS PARANA</title>
+<link rel="stylesheet" href="admin.css">
+
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+  
+</head>
+<body>
+<main class="admin-shell">
+  <section id="loginView" class="login-card">
+    <div class="brand">DECANTS PARANA</div><p class="eyebrow">ADMINISTRACIÓN</p><h1>Ingresar al panel</h1>
+    <p class="muted">Gestioná productos, precios, stock, imágenes, textos y diseño.</p>
+    <form id="loginForm"><label>Usuario<input id="username" autocomplete="username" required></label><label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label><button class="btn primary" type="submit">Ingresar</button><p id="loginMsg" class="msg"></p></form>
+  </section>
+  <section id="panelView" hidden>
+    <header class="topbar"><div><div class="brand">DECANTS PARANA</div><span class="muted">Panel de administración</span></div><div class="actions"><a class="btn light" href="/" target="_blank">Ver sitio</a><button id="logoutBtn" class="btn light">Salir</button></div></header>
+    <nav class="tabs"><button data-tab="products" class="tab active">Productos</button><button data-tab="settings" class="tab">Diseño y textos</button></nav>
+    <div id="productsTab" class="tab-content">
+      <div class="toolbar"><div><h2>Productos</h2><p id="productStats" class="muted"></p></div><div class="toolbar-actions"><input id="productSearch" placeholder="Buscar..." type="search"><select id="brandFilter"><option value="all">Todas las marcas</option></select><button id="newProduct" class="btn primary">+ Nuevo</button><button id="saveProducts" class="btn primary">Guardar cambios</button></div></div>
+      <div id="productEditor" class="editor-card" hidden></div>
+      <div class="table-wrap"><table><thead><tr><th>Visible</th><th>Producto</th><th>Marca</th><th>5 ml</th><th>10 ml</th><th>Stock</th><th>Foto</th><th></th></tr></thead><tbody id="productRows"></tbody></table></div>
+    </div>
+    <div id="settingsTab" class="tab-content" hidden>
+      <div class="settings-grid">
+        <section class="editor-card"><h2>Contenido</h2><div class="form-grid">
+          <label>Nombre del sitio<input data-setting="siteName"></label><label>Texto superior<input data-setting="heroEyebrow"></label><label>Título principal<input data-setting="heroTitle"></label><label>Énfasis del título<input data-setting="heroTitleAccent"></label><label class="wide">Texto de portada<textarea data-setting="heroText"></textarea></label><label>Eyebrow catálogo<input data-setting="catalogEyebrow"></label><label>Título catálogo<input data-setting="catalogTitle"></label><label>Eyebrow cómo comprar<input data-setting="howEyebrow"></label><label>Título cómo comprar<input data-setting="howTitle"></label><label>Título contacto<input data-setting="contactTitle"></label><label class="wide">Texto contacto<textarea data-setting="contactText"></textarea></label><label class="wide">Texto pie<input data-setting="footerText"></label>
+        </div></section>
+        <section class="editor-card"><h2>Precios y contacto</h2><div class="form-grid"><label>Precio general 5 ml<input type="number" min="0" data-setting="price5"></label><label>Precio general 10 ml<input type="number" min="0" data-setting="price10"></label><label>WhatsApp<input data-setting="whatsapp"></label><label>Email<input type="email" data-setting="email"></label><label class="wide">Alias Mercado Pago<input data-setting="alias"></label></div></section>
+        <section class="editor-card"><h2>Estilo</h2><div class="form-grid"><label>Color principal<input type="text" data-setting="primaryColor"></label><label>Color acento<input type="text" data-setting="accentColor"></label><label>Fondo<input type="text" data-setting="backgroundColor"></label><label>Tarjetas<input type="text" data-setting="cardColor"></label><label>Texto<input type="text" data-setting="textColor"></label><label>Texto secundario<input type="text" data-setting="mutedColor"></label><label class="wide">Tipografía CSS<input data-setting="fontFamily"></label></div><p class="muted">Podés usar nombres de fuentes del sistema o una pila CSS. No se cargan fuentes externas.</p></section>
+      </div>
+      <button id="saveSettings" class="btn primary">Guardar diseño y textos</button><p id="settingsMsg" class="msg"></p>
+    </div>
+  </section>
+</main>
+<script src="admin.js"></script>
+</body></html>
