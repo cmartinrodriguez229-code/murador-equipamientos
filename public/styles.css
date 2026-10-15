@@ -1,9 +1,9 @@
 
-/* 1. CARGA LOCAL CON EXTENSIONES EN MAYÚSCULAS */
+/* 1. CARGA LOCAL CON LOS NOMBRES EXACTOS DE TU REPOSITORIO */
 @font-face {
   font-family: 'Bjorn';
-  src: url('/fonts/bjorn-regular.WOFF2') format('woff2'),
-       url('/fonts/bjorn-regular.WOFF') format('woff');
+  src: url('/fonts/Bjorn Regular.woff2') format('woff2'),
+       url('/fonts/Bjorn Regular.woff') format('woff');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
