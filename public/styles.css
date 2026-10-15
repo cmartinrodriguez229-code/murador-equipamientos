@@ -1,12 +1,14 @@
-/* 1. CARGA LOCAL DE TU TIPOGRAFÍA EN FORMATO WEB OPTIMIZADO */
+
+/* 1. CARGA LOCAL CON EXTENSIONES EN MAYÚSCULAS */
 @font-face {
   font-family: 'Bjorn';
-  src: url('/fonts/bjorn-regular.woff2') format('woff2'), /* Tu archivo .woff2 */
-       url('/fonts/bjorn-regular.woff') format('woff');   /* Tu archivo .woff */
+  src: url('/fonts/bjorn-regular.WOFF2') format('woff2'),
+       url('/fonts/bjorn-regular.WOFF') format('woff');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
 }
+
 
 /* 2. ESTILOS GENERALES */
 *{box-sizing:border-box}
