@@ -140,3 +140,53 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
   footer{flex-wrap:wrap}
   .hero h1{font-size:46px}
 }
+
+/* --- NUEVOS AJUSTES PARA LA PORTADA --- */
+
+/* 1. Color amarillo y separación de letras para el Kicker */
+.hero .kicker-yellow {
+  color: #f2c400 !important; /* Amarillo del catálogo */
+  font-family: "Bjorn", sans-serif !important;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.35em !important; /* Letras bien separadas */
+  text-transform: uppercase;
+  margin: 0 0 28px;
+}
+
+/* 2. Controlar el tamaño del logo de la derecha para que actúe como un sello sutil */
+.hero-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 180px; /* Hace el logo de la derecha mucho más chico */
+  opacity: 0.06; /* Lo vuelve súper translúcido como marca de agua */
+  transform: rotate(-8deg); /* Le da la inclinación original del catálogo */
+  margin-right: max(2vw, 20px);
+}
+
+/* Ajusta la imagen interna del sello */
+.hero-stamp img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+/* Ajusta el texto interno del sello */
+.hero-stamp span {
+  font-family: "Bjorn", sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-align: center;
+  color: #ffffff;
+}
+
+.hero-stamp small {
+  display: block;
+  font-weight: 300;
+  font-size: 8px;
+  letter-spacing: 0.15em;
+}
