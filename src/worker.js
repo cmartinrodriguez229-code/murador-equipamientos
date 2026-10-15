@@ -4,6 +4,7 @@
 
 const PRODUCTS_KEY = "catalog:products";
 const SETTINGS_KEY = "catalog:settings";
+const TAXONOMY_KEY = "catalog:taxonomy";
 const IMG_PREFIX = "img:";
 const SESSION_COOKIE = "murador_admin_session";
 const SESSION_HOURS = 12;
@@ -33,6 +34,17 @@ const defaultSettings = {
   textColor: "#1f2937",
   mutedColor: "#6b7280",
   fontFamily: "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+};
+
+// Secciones (líneas) y sus categorías. Se editan desde /admin; esto es solo el punto de partida.
+const defaultTaxonomy = {
+  sections: [
+    { name: "Industrial", categories: ["Gestión y venta", "Cocción", "Elaboración y procesamiento", "Frío y exhibición", "Mobiliario e infraestructura", "Envasado"] },
+    { name: "Hogar", categories: ["Cocina", "Frío", "Lavado", "Pequeños electrodomésticos", "Climatización", "Audio y video", "Muebles", "Descanso"] },
+    { name: "Exterior y Tiempo Libre", categories: ["Movilidad", "Jardín y parque", "Limpieza"] },
+    { name: "Tecnología", categories: ["Consolas", "Informática", "Telefonía"] },
+    { name: "Herramientas y Mantenimiento", categories: ["Herramientas eléctricas", "Aire comprimido"] }
+  ]
 };
 
 class HttpError extends Error {
@@ -92,15 +104,7 @@ async function seedFile(env, req, name) {
   if (!r.ok) throw new HttpError(500, `No se pudo leer ${name}`);
   return r.json();
 }
-const normalizeSeed = (seed) => seed.map((p) => ({
-  ...p,
-  visible: p.visible !== false,
-  stock: Number.isFinite(p.stock) ? p.stock : 999,
-  price5: p.price5 ?? 12000,
-  price10: p.price10 ?? 18000,
-  enabled5: p.enabled5 !== false,
-  enabled10: p.enabled10 !== false
-}));
+const normalizeSeed = (seed) => seed.map((p) => ({ ...p, visible: p.visible !== false }));
 
 async function getProducts(env, req, { persistSeed = true } = {}) {
   requireKV(env);
@@ -118,24 +122,60 @@ async function getSettings(env, req) {
   return { ...defaultSettings, ...saved };
 }
 
+const txt = (v, max) => String(v ?? "").trim().slice(0, max);
+
 function cleanProduct(p) {
-  const id = String(p.id || "").trim();
-  const name = String(p.name || "").trim();
-  const brand = String(p.brand || "").trim();
-  if (!id || !name || !brand) throw new HttpError(400, "Cada producto necesita id, nombre y marca.");
+  const code = txt(p.code, 40);
+  const name = txt(p.name, 160);
+  const line = txt(p.line, 80);
+  if (!code) throw new HttpError(400, "Cada artículo necesita un código.");
+  if (!name) throw new HttpError(400, `El artículo ${code} necesita un nombre.`);
+  if (!line) throw new HttpError(400, `El artículo ${code} necesita una sección.`);
   return {
-    ...p, id, name, brand,
+    id: safeId(txt(p.id, 120) || code.toLowerCase()),
+    code, name, line,
+    category: txt(p.category, 80),
+    brand: txt(p.brand, 120),
+    description: txt(p.description, 1500),
+    image: txt(p.image, 400),
     visible: p.visible !== false,
-    stock: Math.max(0, Number(p.stock) || 0),
-    price5: Math.max(0, Number(p.price5) || 0),
-    price10: Math.max(0, Number(p.price10) || 0),
-    enabled5: p.enabled5 !== false,
-    enabled10: p.enabled10 !== false,
-    description: String(p.description || ""),
-    image: String(p.image || ""),
-    source: String(p.source || ""),
-    sourceVerified: String(p.sourceVerified || "")
+    featured: p.featured === true
   };
+}
+
+function cleanTaxonomy(t) {
+  const sections = Array.isArray(t?.sections) ? t.sections : [];
+  const seen = new Set();
+  const out = [];
+  for (const sec of sections) {
+    const name = txt(sec?.name, 80);
+    if (!name) throw new HttpError(400, "Hay una sección sin nombre.");
+    if (seen.has(name.toLowerCase())) throw new HttpError(400, `La sección "${name}" está repetida.`);
+    seen.add(name.toLowerCase());
+    const cats = [];
+    for (const c of Array.isArray(sec.categories) ? sec.categories : []) {
+      const cn = txt(c, 80);
+      if (cn && !cats.some((x) => x.toLowerCase() === cn.toLowerCase())) cats.push(cn);
+    }
+    out.push({ name, categories: cats });
+  }
+  return { sections: out };
+}
+
+// Une lo guardado con las secciones/categorías que usan los artículos, para que nunca falte ninguna.
+function buildTaxonomy(saved, products) {
+  const base = cleanTaxonomy(saved?.sections ? saved : defaultTaxonomy);
+  for (const p of products) {
+    if (!p.line) continue;
+    let sec = base.sections.find((x) => x.name === p.line);
+    if (!sec) { sec = { name: p.line, categories: [] }; base.sections.push(sec); }
+    if (p.category && !sec.categories.includes(p.category)) sec.categories.push(p.category);
+  }
+  return base;
+}
+async function getTaxonomy(env, products) {
+  requireKV(env);
+  return buildTaxonomy(await env.MURADOR.get(TAXONOMY_KEY, "json"), products);
 }
 
 const decode = (v) => { try { return decodeURIComponent(v); } catch { return v; } };
@@ -172,7 +212,8 @@ async function handle(req, env, ctx) {
   try {
     if (method === "GET" && path === "catalog") {
       const [products, settings] = await Promise.all([getProducts(env, req, { persistSeed: false }), getSettings(env, req)]);
-      return json({ products: products.filter((p) => p.visible !== false), settings });
+      const visible = products.filter((p) => p.visible !== false);
+      return json({ products: visible, settings, taxonomy: await getTaxonomy(env, visible) }, 200, { "cache-control": "no-store" });
     }
     if (method === "POST" && path === "login") {
       const body = await req.json().catch(() => ({}));
@@ -195,15 +236,36 @@ async function handle(req, env, ctx) {
     if (!(await validSession(env, req))) return json({ error: "No autorizado." }, 401);
 
     if (method === "GET" && path === "admin") {
-      const [products, settings] = await Promise.all([getProducts(env, req), getSettings(env, req)]);
-      return json({ products, settings });
+      const products = await getProducts(env, req);
+      return json({ products, taxonomy: await getTaxonomy(env, products) });
     }
     if (method === "PUT" && path === "products") {
       requireKV(env);
       const body = await req.json();
       const products = (Array.isArray(body.products) ? body.products : []).map(cleanProduct);
+      if (products.length > 3000) throw new HttpError(400, "Demasiados artículos.");
+      const ids = new Set(), codes = new Set();
+      for (const p of products) {
+        if (ids.has(p.id)) throw new HttpError(400, `El código ${p.code} está repetido.`);
+        if (codes.has(p.code.toLowerCase())) throw new HttpError(400, `El código ${p.code} está repetido.`);
+        ids.add(p.id); codes.add(p.code.toLowerCase());
+      }
+      const previous = (await env.MURADOR.get(PRODUCTS_KEY, "json")) || [];
       await env.MURADOR.put(PRODUCTS_KEY, JSON.stringify(products));
+      // borra las fotos subidas de los artículos eliminados
+      await Promise.all(previous.filter((p) => !ids.has(p.id)).map((p) => env.MURADOR.delete(IMG_PREFIX + safeId(p.id))));
       return json({ ok: true, count: products.length });
+    }
+    if (method === "PUT" && path === "taxonomy") {
+      requireKV(env);
+      const taxonomy = cleanTaxonomy(await req.json());
+      await env.MURADOR.put(TAXONOMY_KEY, JSON.stringify(taxonomy));
+      return json({ ok: true, taxonomy });
+    }
+    if (method === "DELETE" && path.startsWith("image/")) {
+      requireKV(env);
+      await env.MURADOR.delete(IMG_PREFIX + safeId(decode(path.slice(6))));
+      return json({ ok: true });
     }
     if (method === "PUT" && path === "settings") {
       requireKV(env);
