@@ -14,7 +14,7 @@ Proyecto separado de DECANTS PARANÁ. Base inicial de 63 códigos extraídos del
 3. Ejecutar `npm install`.
 4. Crear un KV exclusivo: `npx wrangler kv namespace create MURADOR` y copiar su ID en `wrangler.jsonc`. El binding se llama `DECANTS` solo por compatibilidad con el Worker de referencia: debe apuntar al namespace nuevo de Murador, nunca al namespace real de Decants.
 5. Configurar secretos del Worker: `npx wrangler secret put ADMIN_USER`, `npx wrangler secret put ADMIN_PASSWORD` y `npx wrangler secret put SESSION_SECRET`.
-6. Ejecutar `npm run dev` para probar; luego `npm run deploy`.
+6. Ejecutar `npm run dev` para probar; luego `npm run deploy`..
 
 ## URLs
 - Catálogo: `/`
