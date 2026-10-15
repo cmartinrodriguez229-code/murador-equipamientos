@@ -188,7 +188,7 @@ h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:upperc
 
 /* SE CAMBIÓ A RELATIVE PARA SER CONTENEDOR DE LA ETIQUETA ABSOLUTA */
 .photo {
-  background: #f6f5f1;
+  background: #ffffff;
   display: flex;             /* Cambiado de grid a flex para mejor control */
   align-items: center;
   justify-content: center;
