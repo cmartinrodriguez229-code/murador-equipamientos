@@ -6,6 +6,7 @@ const PRODUCTS_KEY = "catalog:products";
 const SETTINGS_KEY = "catalog:settings";
 const TAXONOMY_KEY = "catalog:taxonomy";
 const IMG_PREFIX = "img:";
+const CUSTOMER_PREFIX = "customer:";
 const SESSION_COOKIE = "murador_admin_session";
 const SESSION_HOURS = 12;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -214,6 +215,34 @@ async function handle(req, env, ctx) {
       const [products, settings] = await Promise.all([getProducts(env, req, { persistSeed: false }), getSettings(env, req)]);
       const visible = products.filter((p) => p.visible !== false);
       return json({ products: visible, settings, taxonomy: await getTaxonomy(env, visible) }, 200, { "cache-control": "no-store" });
+    }
+    if (path === "customer" && (method === "GET" || method === "PUT")) {
+      requireKV(env);
+      const body = method === "PUT" ? await req.json().catch(() => ({})) : {};
+      const digits = String(method === "PUT" ? body.phone : url.searchParams.get("phone") || "").replace(/\D/g, "");
+      if (digits.length < 8 || digits.length > 15) return json({ error: "Teléfono inválido." }, 400);
+      const key = CUSTOMER_PREFIX + digits;
+      const old = (await env.MURADOR.get(key, "json")) || {};
+      const cleanFavs = (a) => [...new Set((Array.isArray(a) ? a : []).map((x) => txt(x, 120)).filter(Boolean))].slice(0, 200);
+      if (method === "GET") {
+        // solo devuelve lo mínimo: nombre y favoritos (nunca domicilio ni email)
+        return json({ found: !!old.phone, nombre: old.nombre || "", apellido: old.apellido || "", favs: cleanFavs(old.favs) });
+      }
+      const rec = {
+        phone: digits,
+        nombre: txt(body.nombre, 80) || old.nombre || "",
+        apellido: txt(body.apellido, 80) || old.apellido || "",
+        domicilio: txt(body.domicilio, 160) || old.domicilio || "",
+        localidad: txt(body.localidad, 100) || old.localidad || "",
+        email: txt(body.email, 120) || old.email || "",
+        favs: body.merge ? cleanFavs([...(old.favs || []), ...(body.favs || [])]) : cleanFavs(body.favs),
+        updated: new Date().toISOString()
+      };
+      // en una actualización de solo favoritos no se pisan los datos con vacíos
+      if (body.onlyFavs) Object.assign(rec, { nombre: old.nombre || "", apellido: old.apellido || "", domicilio: old.domicilio || "", localidad: old.localidad || "", email: old.email || "" });
+      if (body.onlyFavs && !old.phone) return json({ ok: true, favs: rec.favs });
+      await env.MURADOR.put(key, JSON.stringify(rec));
+      return json({ ok: true, favs: rec.favs });
     }
     if (method === "POST" && path === "login") {
       const body = await req.json().catch(() => ({}));
