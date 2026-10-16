@@ -294,11 +294,11 @@ h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:upperc
 .contact>div{max-width:650px}
 .contact p:not(.kicker){color:#555}
 .contact .kicker{color:#756600}
-.contact-links{display:flex;flex-wrap:wrap;gap:12px}
-.social{display:inline-flex;align-items:center;gap:10px;padding:14px 20px;background:#7b3f97;color:#fff;text-decoration:none;font:800 13px "Segoe UI",Roboto,Arial,sans-serif;letter-spacing:.04em;transition:background .15s}
+.contact-links{display:flex;flex-direction:column;gap:14px;min-width:min(340px,100%)}
+.social{display:inline-flex;align-items:center;gap:14px;padding:20px 28px;background:#7b3f97;color:#fff;text-decoration:none;font:800 17px "Segoe UI",Roboto,Arial,sans-serif;letter-spacing:.04em;transition:background .15s}
 .social:hover{background:#171717}
 .social:focus-visible{outline:3px solid #171717;outline-offset:2px}
-.social svg{flex:none}
+.social svg{flex:none;width:30px;height:30px}
 
 /* ALIADO */
 .ally{background:#f2c400;color:#171717;padding:70px max(6vw,22px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:center}
