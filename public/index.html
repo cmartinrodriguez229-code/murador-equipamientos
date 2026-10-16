@@ -32,7 +32,9 @@
     </a>
     <nav>
         <a href="#catalogo">Catálogo</a>
+        <a href="#aliado">Qué te ofrecemos</a>
         <a href="#comprar">Cómo comprar</a>
+        <a href="#datos">Tus datos</a>
         <a href="#contacto">Contacto</a>
     </nav>
     <button id="favOpen" class="cart" type="button" aria-label="Abrir favoritos">
@@ -108,6 +110,27 @@
             <article><span class="ally-ico"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><h3>Variedad</h3><p>Diferentes equipos, capacidades y marcas.</p></article>
             <article><span class="ally-ico"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h14v11H1z"/><path d="M15 10h4l3 3v4h-7"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span><h3>Entrega y logística</h3><p>Coordinamos el envío de tu equipamiento.</p></article>
         </div>
+    </section>
+    <section id="datos" class="datos">
+        <div class="datos-text">
+            <p class="kicker">CLIENTES</p>
+            <h2>Tus datos</h2>
+            <p>Completalos para agilizar tus pedidos y para que tus productos favoritos (♥) queden guardados en tu cuenta, también si entrás desde otro dispositivo. Tu cuenta se identifica con tu teléfono. El email es opcional.</p>
+        </div>
+        <form id="customerForm" class="datos-card" novalidate>
+            <div class="datos-row">
+                <label for="cNombre">Nombre<input id="cNombre" name="nombre" autocomplete="given-name" maxlength="80" required></label>
+                <label for="cApellido">Apellido<input id="cApellido" name="apellido" autocomplete="family-name" maxlength="80" required></label>
+            </div>
+            <label for="cDomicilio">Domicilio<input id="cDomicilio" name="domicilio" autocomplete="street-address" maxlength="160" required></label>
+            <div class="datos-row">
+                <label for="cLocalidad">Localidad<input id="cLocalidad" name="localidad" autocomplete="address-level2" maxlength="100" required></label>
+                <label for="cTelefono">Teléfono<input id="cTelefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" required></label>
+            </div>
+            <label for="cEmail">Email <small>(opcional)</small><input id="cEmail" name="email" type="email" autocomplete="email" maxlength="120" placeholder="tuemail@ejemplo.com"></label>
+            <button class="btn dark datos-save" type="submit">GUARDAR MIS DATOS</button>
+            <p id="customerMsg" class="datos-msg" role="status"></p>
+        </form>
     </section>
     <section id="contacto" class="contact">
         <div>

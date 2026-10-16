@@ -27,7 +27,7 @@ button,input,select{font:inherit}
   object-fit: contain;
 }
 
-nav{display:flex;gap:28px;font-size:13px;font-weight:600}
+nav{display:flex;gap:28px;font-size:13px;font-weight:600;white-space:nowrap}
 .cart{display:inline-flex;align-items:center;gap:8px;border:1px solid #171717;background:transparent;padding:10px 16px;border-radius:2px;cursor:pointer;font-weight:700}
 .cart:hover{background:#efede4}
 .heart-ico{flex-shrink:0;color:#7b3f97}
@@ -301,6 +301,7 @@ h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:upperc
 .social svg{flex:none;width:30px;height:30px}
 
 /* ALIADO */
+.ally,.catalog,.how,.contact{scroll-margin-top:78px}
 .ally{background:#f2c400;color:#171717;padding:70px max(6vw,22px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:center}
 .ally-intro img{height:84px;width:auto;display:block;margin-bottom:22px}
 .ally-intro h2{font:800 clamp(30px,4vw,54px)/1.05 "Bjorn",sans-serif;text-transform:uppercase;margin:0}
@@ -310,6 +311,22 @@ h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:upperc
 .ally-ico{display:inline-grid;place-items:center;width:52px;height:52px;background:#7b3f97;color:#fff;margin-bottom:12px}
 .ally-grid h3{font:800 22px "Bjorn",sans-serif;text-transform:uppercase;margin:0 0 6px;color:#171717}
 .ally-grid p{margin:0;font:600 15px/1.5 "Segoe UI",Roboto,Arial,sans-serif;color:#171717}
+
+/* TUS DATOS */
+.datos{background:#eeece5;padding:70px max(6vw,22px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:start;scroll-margin-top:78px}
+.datos .kicker{color:#756600}
+.datos-text p:not(.kicker){line-height:1.7;color:#555;max-width:520px;font:500 16px/1.7 "Segoe UI",Roboto,Arial,sans-serif}
+.datos-card{background:#fff;border:1px solid #171717;border-left:10px solid #f2c400;padding:28px}
+.datos-card label{display:block;font:800 13px "Segoe UI",Roboto,Arial,sans-serif;margin:0 0 16px;text-transform:none}
+.datos-card label small{font-weight:400;color:#777}
+.datos-card input{display:block;width:100%;margin-top:6px;padding:13px;border:1px solid #cfcabb;background:#f9f8f4;border-radius:0;font:400 16px "Segoe UI",Roboto,Arial,sans-serif;color:#171717}
+.datos-card input:focus-visible{outline:3px solid #f2c400;outline-offset:0;border-color:#171717}
+.datos-card input.bad{border-color:#b3261e;background:#fdf1f0}
+.datos-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.datos-save{margin-top:4px;padding:16px 28px;font-size:13px}
+.datos-save:hover{background:#7b3f97}
+.datos-msg{margin:12px 0 0;min-height:20px;font:700 14px "Segoe UI",Roboto,Arial,sans-serif;color:#b3261e}
+.datos-msg.ok{color:#1d7a3f}
 
 /* VOLVER ARRIBA */
 .to-top[hidden]{display:none}
@@ -379,7 +396,8 @@ body.modal-open{overflow:hidden}
   .linebuttons{grid-template-columns:repeat(2,minmax(0,1fr))}
   .filters{grid-template-columns:1fr 1fr}
   .filters input{grid-column:1/-1}
-  nav{gap:18px}
+  nav{gap:14px;font-size:12px}
+  .cart-label{display:none}
 }
 
 @media(max-width:850px){
@@ -405,6 +423,10 @@ body.modal-open{overflow:hidden}
   .filters input{grid-column:1/-1}
   .filters select{padding:10px 6px;font-size:12px}
   .ally{grid-template-columns:1fr;gap:30px;padding:48px 18px}
+  .datos{grid-template-columns:1fr;gap:24px;padding:48px 18px;scroll-margin-top:66px}
+  .datos-card{padding:20px 16px}
+  .datos-row{grid-template-columns:1fr;gap:0}
+  .datos-save{width:100%}
   .ally-intro img{height:64px}
   .ally-grid{gap:22px 16px}
   .ally-grid h3{font-size:17px}

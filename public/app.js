@@ -143,8 +143,7 @@ function render() {
       const p = all.find(x => x.id === b.dataset.wa);
       if (!p) return;
       window.open(
-        "https://wa.me/" + wa + "?text=" +
-        encodeURIComponent("Hola Murador Equipamientos, quisiera consultar por precio y disponibilidad de " + p.code + " — " + p.name),
+        "https://wa.me/" + wa + "?text=" + encodeURIComponent(waText(p)),
         "_blank", "noopener"
       );
     };
@@ -195,7 +194,110 @@ $("#pager").addEventListener("click", e => {
 /* ---------- FAVORITOS ---------- */
 function saveFavs() {
   localStorage.setItem("murador_favs", JSON.stringify(favs));
+  pushFavs();
 }
+
+/* ---------- CLIENTE (Tus datos) ---------- */
+const CUSTOMER_FIELDS = ["nombre", "apellido", "domicilio", "localidad", "telefono", "email"];
+const REQUIRED = ["nombre", "apellido", "domicilio", "localidad", "telefono"];
+let customer = null;
+try { customer = JSON.parse(localStorage.getItem("murador_customer") || "null"); } catch {}
+
+const phoneDigits = v => String(v || "").replace(/\D/g, "");
+const customerComplete = () => !!customer && REQUIRED.every(k => String(customer[k] || "").trim());
+
+function waText(p) {
+  let t = "Hola Murador Equipamientos, quisiera consultar por precio y disponibilidad de " + p.code + " — " + p.name;
+  if (customerComplete()) {
+    t += "\n\nMis datos:\n" +
+      "Nombre: " + customer.nombre + " " + customer.apellido + "\n" +
+      "Domicilio: " + customer.domicilio + ", " + customer.localidad + "\n" +
+      "Teléfono: " + customer.telefono +
+      (customer.email ? "\nEmail: " + customer.email : "");
+  }
+  return t;
+}
+
+let pushTimer;
+function pushFavs() {
+  if (!customer || phoneDigits(customer.telefono).length < 8) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => {
+    fetch("/api/customer", {
+      method: "PUT", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ phone: customer.telefono, favs, onlyFavs: true })
+    }).catch(() => {});
+  }, 600);
+}
+
+async function pullFavs() {
+  if (!customer || phoneDigits(customer.telefono).length < 8) return;
+  try {
+    const r = await fetch("/api/customer?phone=" + encodeURIComponent(phoneDigits(customer.telefono)));
+    const d = await r.json();
+    if (!d.found) return;
+    const merged = [...new Set([...favs, ...d.favs])];
+    if (merged.length !== favs.length) {
+      favs = merged;
+      localStorage.setItem("murador_favs", JSON.stringify(favs));
+      render(); renderFavs();
+    }
+  } catch {}
+}
+
+function fillCustomerForm() {
+  if (!customer) return;
+  CUSTOMER_FIELDS.forEach(k => { const el = document.querySelector('#customerForm [name="' + k + '"]'); if (el) el.value = customer[k] || ""; });
+}
+
+const cForm = $("#customerForm"), cMsg = $("#customerMsg");
+function say(text, ok) { cMsg.textContent = text; cMsg.className = "datos-msg" + (ok ? " ok" : ""); }
+
+cForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = {};
+  CUSTOMER_FIELDS.forEach(k => { data[k] = cForm.elements[k].value.trim(); });
+  let bad = false;
+  CUSTOMER_FIELDS.forEach(k => cForm.elements[k].classList.remove("bad"));
+  REQUIRED.forEach(k => { if (!data[k]) { cForm.elements[k].classList.add("bad"); bad = true; } });
+  if (!bad && phoneDigits(data.telefono).length < 8) { cForm.elements.telefono.classList.add("bad"); bad = true; }
+  if (!bad && data.email && !/^\S+@\S+\.\S+$/.test(data.email)) { cForm.elements.email.classList.add("bad"); bad = true; }
+  if (bad) { say("Revisá los campos marcados.", false); return; }
+
+  customer = data;
+  localStorage.setItem("murador_customer", JSON.stringify(customer));
+  say("Guardando…", true);
+  try {
+    const r = await fetch("/api/customer", {
+      method: "PUT", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ phone: data.telefono, ...data, favs, merge: true })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || "error");
+    favs = d.favs;
+    localStorage.setItem("murador_favs", JSON.stringify(favs));
+    render(); renderFavs();
+    say("¡Listo! Tus datos y favoritos quedaron guardados.", true);
+  } catch {
+    say("Guardamos tus datos en este dispositivo, pero no pudimos sincronizar tus favoritos. Probá de nuevo más tarde.", false);
+  }
+});
+
+// si el teléfono ya existe en otro dispositivo, se precarga el nombre
+cForm.elements.telefono.addEventListener("blur", async () => {
+  const d = phoneDigits(cForm.elements.telefono.value);
+  if (d.length < 8 || (cForm.elements.nombre.value && cForm.elements.apellido.value)) return;
+  try {
+    const r = await (await fetch("/api/customer?phone=" + d)).json();
+    if (r.found) {
+      if (!cForm.elements.nombre.value) cForm.elements.nombre.value = r.nombre;
+      if (!cForm.elements.apellido.value) cForm.elements.apellido.value = r.apellido;
+      say("Encontramos tu cuenta. Completá el resto y guardá para recuperar tus favoritos.", true);
+    }
+  } catch {}
+});
+
+fillCustomerForm();
 
 function toggleFav(id) {
   favs = favs.includes(id) ? favs.filter(x => x !== id) : [...favs, id];
@@ -282,4 +384,4 @@ const toTop = $("#toTop");
 addEventListener("scroll", () => { toTop.hidden = scrollY < 600; }, { passive: true });
 toTop.addEventListener("click", () => scrollTo({ top: 0, behavior: "smooth" }));
 
-load();
+load().then(pullFavs);
