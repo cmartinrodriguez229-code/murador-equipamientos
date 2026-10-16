@@ -162,10 +162,11 @@ h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:upperc
 .lines-note{margin:28px 0 0;font-weight:800;font-size:clamp(13px,1.1vw,16px);line-height:1.5;text-transform:uppercase;color:#171717}
 
 .catalog{background:#eeece5}
-.catalog-head{display:flex;justify-content:space-between;align-items:end}
+.catalog-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:14px}
 .catalog-head h2{margin-bottom:0}
 
-.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin:28px 0}
+.catalog-body{position:relative}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin:0 0 28px;padding:14px 0;position:sticky;top:78px;z-index:9;background:#eeece5;border-bottom:1px solid #d5d1c7}
 .filters input,.filters select{min-width:0;padding:13px;border:1px solid #d5d1c7;background:#f9f8f4;border-radius:0}
 
 .product {
@@ -273,7 +274,7 @@ h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:upperc
 
 .product h3{font:700 21px/1.05 "Bjorn";text-transform:uppercase;margin:0 0 7px}
 .meta{font-size:12px;color:#b04fe0;margin:0 0 3px}
-.desc{font-size:12px;line-height:1.5;color:#8a8a8a;flex:1}
+.desc{font-size:12px;line-height:1.5;color:#c4c2c0;flex:1}
 
 .actions{display:flex;gap:7px;margin-top:14px}
 .actions button{flex:1;padding:13px 8px;border:1px solid #171717;background:white;font-size:12px;letter-spacing:.04em;font-weight:800;cursor:pointer}
@@ -293,6 +294,28 @@ h2{font:800 clamp(34px,4vw,52px)/1 "Bjorn";margin:0 0 22px;text-transform:upperc
 .contact>div{max-width:650px}
 .contact p:not(.kicker){color:#555}
 .contact .kicker{color:#756600}
+.contact-links{display:flex;flex-wrap:wrap;gap:12px}
+.social{display:inline-flex;align-items:center;gap:10px;padding:14px 20px;background:#7b3f97;color:#fff;text-decoration:none;font:800 13px "Segoe UI",Roboto,Arial,sans-serif;letter-spacing:.04em;transition:background .15s}
+.social:hover{background:#171717}
+.social:focus-visible{outline:3px solid #171717;outline-offset:2px}
+.social svg{flex:none}
+
+/* ALIADO */
+.ally{background:#f2c400;color:#171717;padding:70px max(6vw,22px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:center}
+.ally-intro img{height:84px;width:auto;display:block;margin-bottom:22px}
+.ally-intro h2{font:800 clamp(30px,4vw,54px)/1.05 "Bjorn",sans-serif;text-transform:uppercase;margin:0}
+.ally-intro em{font-style:normal;color:#7b3f97}
+.ally-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px 32px}
+.ally-grid article{border-top:2px solid #171717;padding-top:16px}
+.ally-ico{display:inline-grid;place-items:center;width:52px;height:52px;background:#7b3f97;color:#fff;margin-bottom:12px}
+.ally-grid h3{font:800 22px "Bjorn",sans-serif;text-transform:uppercase;margin:0 0 6px;color:#171717}
+.ally-grid p{margin:0;font:600 15px/1.5 "Segoe UI",Roboto,Arial,sans-serif;color:#171717}
+
+/* VOLVER ARRIBA */
+.to-top[hidden]{display:none}
+.to-top{position:fixed;right:18px;bottom:18px;z-index:50;width:48px;height:48px;border-radius:50%;border:0;background:#7b3f97;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);transition:background .15s,transform .15s}
+.to-top:hover{background:#171717;transform:translateY(-2px)}
+.to-top:focus-visible{outline:3px solid #f2c400;outline-offset:2px}
 
 /* 7. PIE DE PÁGINA */
 footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-content:space-between;gap:15px;font-size:12px;align-items:center}
@@ -303,6 +326,24 @@ footer{padding:25px max(6vw,22px);background:#e4e1d7;display:flex;justify-conten
 .cartbox{width:min(460px,100%);height:100%;background:#f7f6f1;padding:35px;overflow:auto}
 .close{float:right;border:0;background:none;font-size:32px;cursor:pointer}
 img{max-width:100%}
+
+/* PAGINADO: una sola línea en todos los dispositivos */
+.pager{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:6px;margin:34px auto 0;max-width:100%}
+.pg{flex:0 1 42px;min-width:28px;height:42px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid #171717;background:#fff;color:#171717;font:800 14px "Segoe UI",Roboto,Arial,sans-serif;cursor:pointer;border-radius:2px;transition:background .15s,color .15s}
+.pg:hover:not(:disabled):not(.active){background:#efede4}
+.pg.active{background:#171717;color:#fff;cursor:default}
+.pg:disabled{opacity:.35;cursor:not-allowed}
+.pg:focus-visible{outline:3px solid #f2c400;outline-offset:2px}
+.pg-arrow{flex-basis:46px;background:#f2c400;border-color:#171717}
+.pg-arrow:disabled{background:#fff}
+.pg-gap{border:0;background:none;cursor:default;flex-basis:20px;min-width:14px;color:#777}
+.pg svg{display:block}
+@media(max-width:480px){
+  .pager{gap:3px}
+  .pg{height:38px;font-size:13px;min-width:24px;flex-basis:36px}
+  .pg-arrow{flex-basis:38px}
+  .pg-gap{flex-basis:12px;min-width:10px}
+}
 
 /* FAVORITOS */
 .favrow{display:grid;grid-template-columns:60px minmax(0,1fr) 40px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #ddd9cd}
@@ -356,10 +397,20 @@ body.modal-open{overflow:hidden}
   .lines-body{padding:28px 18px 48px}
   .linebuttons{grid-template-columns:1fr;gap:12px}
   .linebtn{min-height:0}
-  .filters{grid-template-columns:1fr;margin:20px 0}
+  .filters{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;top:66px;padding:10px 0;margin-bottom:18px}
+  .filters input{grid-column:1/-1}
+  .filters select{padding:10px 6px;font-size:12px}
+  .ally{grid-template-columns:1fr;gap:30px;padding:48px 18px}
+  .ally-intro img{height:64px}
+  .ally-grid{gap:22px 16px}
+  .ally-grid h3{font-size:17px}
+  .ally-grid p{font-size:14px}
+  .ally-ico{width:44px;height:44px}
+  .social{width:100%;justify-content:center}
+  .contact-links{width:100%}
+  .to-top{right:14px;bottom:14px}
   .steps{grid-template-columns:1fr;gap:12px}
   .contact{align-items:flex-start;flex-direction:column}
-  .contact .btn{width:100%;text-align:center}
   footer{flex-direction:column;align-items:flex-start}
   .hero h1{font-size:42px}
   .cartbox{padding:24px 18px}

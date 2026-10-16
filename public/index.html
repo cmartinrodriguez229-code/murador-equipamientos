@@ -11,14 +11,6 @@
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
     <link href="https://googleapis.com" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
-
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
-
-
-    
 </head>
 <body>
 <header class="top">
@@ -73,13 +65,16 @@
             </div>
             <span id="resultCount"></span>
         </div>
+        <div class="catalog-body">
         <div class="filters">
             <input id="search" placeholder="Buscar por nombre, código o marca…">
-            <select id="lineFilter"><option value="">Todas las líneas</option></select>
-            <select id="categoryFilter"><option value="">Todas las categorías</option></select>
-            <select id="brandFilter"><option value="">Todas las marcas</option></select>
+            <select id="lineFilter"><option value="">Líneas</option></select>
+            <select id="categoryFilter"><option value="">Categorías</option></select>
+            <select id="brandFilter"><option value="">Marcas</option></select>
         </div>
         <div id="products" class="products"></div>
+        <nav id="pager" class="pager" aria-label="Paginación" hidden></nav>
+        </div>
         <p id="empty" hidden>No encontramos productos con esos filtros.</p>
     </section>
     <section id="comprar" class="how">
@@ -91,13 +86,28 @@
             <article><b>03</b><h3>Hablá con nosotros</h3><p>Indicá el código y te informamos precio, disponibilidad y financiación.</p></article>
         </div>
     </section>
+    <section id="aliado" class="ally">
+        <div class="ally-intro">
+            <img src="/LOGO2.png" alt="Murador">
+            <h2>Más que<br>equipamiento,<br>somos tu <em>aliado.</em></h2>
+        </div>
+        <div class="ally-grid">
+            <article><span class="ally-ico"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span><h3>Financiación</h3><p>Alternativas para acompañar tu inversión.</p></article>
+            <article><span class="ally-ico"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></span><h3>Asesoramiento</h3><p>Según producción, espacio y necesidad.</p></article>
+            <article><span class="ally-ico"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><h3>Variedad</h3><p>Diferentes equipos, capacidades y marcas.</p></article>
+            <article><span class="ally-ico"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h14v11H1z"/><path d="M15 10h4l3 3v4h-7"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span><h3>Entrega y logística</h3><p>Coordinamos el envío de tu equipamiento.</p></article>
+        </div>
+    </section>
     <section id="contacto" class="contact">
         <div>
             <p class="kicker">ASESORAMIENTO PERSONALIZADO</p>
             <h2>Contanos qué necesitás.</h2>
             <p>Te ayudamos a encontrar el equipamiento adecuado para tu casa, comercio o industria.</p>
         </div>
-        <a class="btn yellow" href="https://wa.me/5493434627755" target="_blank" rel="noopener">CONSULTAR POR WHATSAPP ↗</a>
+        <div class="contact-links">
+            <a class="social" href="https://wa.me/5493434627755" target="_blank" rel="noopener" aria-label="WhatsApp +54 9 343 462-7755"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="currentColor"><path d="M12.04 2a9.9 9.9 0 0 0-8.5 14.95L2 22l5.2-1.5A9.9 9.9 0 1 0 12.04 2zm0 1.8a8.1 8.1 0 1 1-4.2 15.04l-.3-.18-3 .87.9-2.93-.2-.3A8.1 8.1 0 0 1 12.04 3.8zM8.6 7.6c-.2 0-.5.1-.7.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.2 2.4.9 2.9.7 3.4.7.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3l-2-.9c-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-.3-.2-1.2-.4-2.3-1.4-.8-.8-1.4-1.700-1.5-2-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5z"/></svg><span>+54 9 343 462-7755</span></a>
+            <a class="social" href="https://instagram.com/equipamientosmurador" target="_blank" rel="noopener" aria-label="Instagram equipamientosmurador"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg><span>@equipamientosmurador</span></a>
+        </div>
     </section>
 </main>
 <footer>
@@ -105,6 +115,7 @@
     <span>Equipamos tu presente. Impulsamos tu futuro.</span>
     <a href="/admin.html">Administración</a>
 </footer>
+<button id="toTop" class="to-top" type="button" aria-label="Volver arriba" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5M5 12l7-7 7 7"/></svg></button>
 <div id="favPanel" class="cartpanel" hidden>
     <div class="cartbox" role="dialog" aria-modal="true" aria-labelledby="favTitle">
         <button id="favClose" class="close" type="button" aria-label="Cerrar">×</button>

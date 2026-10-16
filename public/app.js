@@ -11,6 +11,9 @@ const DEFAULT_SECTIONS = [
 ];
 let sections = DEFAULT_SECTIONS;
 
+const PAGE_SIZE = 8;
+let page = 1;
+
 let all = [],
     favs = JSON.parse(localStorage.getItem("murador_favs") || "[]");
 
@@ -56,6 +59,7 @@ function renderLines() {
     b.onclick = () => {
       $("#lineFilter").value = b.dataset.line;
       $("#categoryFilter").value = "";
+      page = 1;
       render();
       $("#catalogo").scrollIntoView();
     };
@@ -71,9 +75,9 @@ function populate() {
         .join("");
   };
 
-  opts("#lineFilter", sections.map(x => x.name), "Todas las líneas", true);
-  opts("#categoryFilter", all.map(p => p.category), "Todas las categorías");
-  opts("#brandFilter", all.map(p => p.brand), "Todas las marcas");
+  opts("#lineFilter", sections.map(x => x.name), "Líneas", true);
+  opts("#categoryFilter", all.map(p => p.category), "Categorías");
+  opts("#brandFilter", all.map(p => p.brand), "Marcas");
 }
 
 function render() {
@@ -90,7 +94,12 @@ function render() {
   $("#resultCount").textContent = `${list.length} artículos`;
   $("#empty").hidden = !!list.length;
 
-  $("#products").innerHTML = list.map(p => `
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  if (page > totalPages) page = totalPages;
+  const pageItems = list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  renderPager(totalPages);
+
+  $("#products").innerHTML = pageItems.map(p => `
     <article class="product">
 
       <!-- CÓDIGO Y CATEGORÍA: AHORA ANTES DE LA FOTO -->
@@ -141,6 +150,47 @@ function render() {
     };
   });
 }
+
+/* ---------- PAGINADO ---------- */
+const ARROW_L = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 12H4M10 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ARROW_R = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function pageList(total, cur) {
+  // 1 … 4 5 6 … 8  (siempre como máximo 7 posiciones, para que entre en una sola línea)
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const set = new Set([1, total, cur - 1, cur, cur + 1]);
+  if (cur <= 3) [2, 3, 4].forEach(n => set.add(n));
+  if (cur >= total - 2) [total - 3, total - 2, total - 1].forEach(n => set.add(n));
+  const nums = [...set].filter(n => n >= 1 && n <= total).sort((a, b) => a - b);
+  const out = [];
+  nums.forEach((n, i) => {
+    if (i && n - nums[i - 1] > 1) out.push("…");
+    out.push(n);
+  });
+  return out;
+}
+
+function renderPager(total) {
+  const nav = $("#pager");
+  nav.hidden = total <= 1;
+  if (total <= 1) { nav.innerHTML = ""; return; }
+
+  nav.innerHTML =
+    `<button type="button" class="pg pg-arrow" data-go="${page - 1}" aria-label="Página anterior" ${page === 1 ? "disabled" : ""}>${ARROW_L}</button>` +
+    pageList(total, page).map(n => n === "…"
+      ? '<span class="pg pg-gap" aria-hidden="true">…</span>'
+      : `<button type="button" class="pg${n === page ? " active" : ""}" data-go="${n}" aria-label="Página ${n}"${n === page ? ' aria-current="page"' : ""}>${n}</button>`
+    ).join("") +
+    `<button type="button" class="pg pg-arrow" data-go="${page + 1}" aria-label="Página siguiente" ${page === total ? "disabled" : ""}>${ARROW_R}</button>`;
+}
+
+$("#pager").addEventListener("click", e => {
+  const b = e.target.closest("[data-go]");
+  if (!b || b.disabled) return;
+  page = Number(b.dataset.go);
+  render();
+  $("#catalogo").scrollIntoView({ behavior: "smooth" });
+});
 
 /* ---------- FAVORITOS ---------- */
 function saveFavs() {
@@ -224,7 +274,12 @@ document.addEventListener("keydown", e => {
 });
 
 ["#search", "#lineFilter", "#categoryFilter", "#brandFilter"].forEach(s => {
-  $(s).addEventListener(s === "#search" ? "input" : "change", render);
+  $(s).addEventListener(s === "#search" ? "input" : "change", () => { page = 1; render(); });
 });
+
+/* volver arriba */
+const toTop = $("#toTop");
+addEventListener("scroll", () => { toTop.hidden = scrollY < 600; }, { passive: true });
+toTop.addEventListener("click", () => scrollTo({ top: 0, behavior: "smooth" }));
 
 load();
