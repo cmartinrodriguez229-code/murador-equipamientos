@@ -206,16 +206,22 @@ try { customer = JSON.parse(localStorage.getItem("murador_customer") || "null");
 const phoneDigits = v => String(v || "").replace(/\D/g, "");
 const customerComplete = () => !!customer && REQUIRED.every(k => String(customer[k] || "").trim());
 
+function customerBlock() {
+  if (!customerComplete()) return "";
+  return "\n\nMis datos:\n" +
+    "Nombre: " + customer.nombre + " " + customer.apellido + "\n" +
+    "Domicilio: " + customer.domicilio + ", " + customer.localidad + "\n" +
+    "Teléfono: " + customer.telefono +
+    (customer.email ? "\nEmail: " + customer.email : "");
+}
+
 function waText(p) {
-  let t = "Hola Murador Equipamientos, quisiera consultar por precio y disponibilidad de " + p.code + " — " + p.name;
-  if (customerComplete()) {
-    t += "\n\nMis datos:\n" +
-      "Nombre: " + customer.nombre + " " + customer.apellido + "\n" +
-      "Domicilio: " + customer.domicilio + ", " + customer.localidad + "\n" +
-      "Teléfono: " + customer.telefono +
-      (customer.email ? "\nEmail: " + customer.email : "");
-  }
-  return t;
+  return "Hola Murador Equipamientos, quisiera consultar por precio y disponibilidad de " + p.code + " — " + p.name + customerBlock();
+}
+
+function waFavsText(items) {
+  return "Hola Murador Equipamientos, quisiera consultar por precio y disponibilidad de los siguientes productos:\n" +
+    items.map(p => "• " + p.code + " — " + p.name).join("\n") + customerBlock();
 }
 
 let pushTimer;
@@ -309,6 +315,7 @@ function toggleFav(id) {
 function renderFavs() {
   const items = favs.map(id => all.find(p => p.id === id)).filter(Boolean);
   $("#favCount").textContent = items.length;
+  $("#favConsult").disabled = !items.length;
 
   $("#favItems").innerHTML = items.length
     ? items.map(p => `
@@ -327,6 +334,12 @@ function renderFavs() {
     b.onclick = () => toggleFav(b.dataset.remove);
   });
 }
+
+$("#favConsult").addEventListener("click", () => {
+  const items = favs.map(id => all.find(p => p.id === id)).filter(Boolean);
+  if (!items.length) return;
+  window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(waFavsText(items)), "_blank", "noopener");
+});
 
 function openFavs() {
   renderFavs();
