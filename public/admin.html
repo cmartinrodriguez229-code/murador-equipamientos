@@ -63,6 +63,8 @@
       <div class="product-tools">
         <button class="btn" id="uploadPriceSheet" type="button">SUBIR PLANILLA DE PRECIOS ACTUALIZADOS</button>
         <input id="priceSheetFile" type="file" accept=".xlsx,.xls,.csv" hidden>
+        <button class="btn" id="publishAllPrices" type="button">Publicar todos los precios</button>
+        <button class="btn" id="unpublishAllPrices" type="button">Despublicar todos los precios</button>
         <button class="btn dark" id="newProduct" type="button">+ Nuevo artículo</button>
       </div>
     </div>
@@ -86,6 +88,7 @@
         <span role="columnheader">Artículo</span>
         <span role="columnheader">Sección / categoría</span>
         <span role="columnheader">Marca</span>
+        <span role="columnheader">Precio publicado / activar</span>
         <span role="columnheader"></span>
       </div>
       <div id="rows"></div>

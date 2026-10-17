@@ -135,6 +135,7 @@ function renderRows() {
       <div class="name"><small>${esc(p.code)}</small><b>${esc(p.name)}</b></div>
       <div class="sec"><b>${esc(p.line)}</b><small>${esc(p.category || "Sin categoría")}</small></div>
       <div class="brandcell">${esc(p.brand)}</div>
+      <div class="pricecell"><b>${Number(p.price) > 0 ? new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(Number(p.price)) : "Sin precio"}</b><label><input type="checkbox" data-price-published ${p.pricePublished === true && Number(p.price) > 0 ? "checked" : ""} ${Number(p.price) > 0 ? "" : "disabled"} aria-label="Publicar precio de ${esc(p.code)}"> <span>${p.pricePublished === true && Number(p.price) > 0 ? "Publicado" : "No publicado"}</span></label></div>
       <div class="acts">
         <button class="btn sm" data-edit type="button">Editar</button>
         <button class="btn sm danger-o" data-del type="button">Eliminar</button>
@@ -149,6 +150,14 @@ $("#rows").addEventListener("click", (e) => {
   else if (e.target.closest("[data-del]")) deleteProduct(p);
 });
 $("#rows").addEventListener("change", (e) => {
+  if (e.target.matches("[data-price-published]")) {
+    const row = e.target.closest(".row");
+    const p = products.find((x) => x.id === row.dataset.id); if (!p) return;
+    p.pricePublished = e.target.checked && Number(p.price) > 0;
+    e.target.nextElementSibling.textContent = p.pricePublished ? "Publicado" : "No publicado";
+    setDirty(true);
+    return;
+  }
   if (!e.target.matches("[data-vis]")) return;
   const row = e.target.closest(".row");
   const p = products.find((x) => x.id === row.dataset.id); if (!p) return;
@@ -158,6 +167,18 @@ $("#rows").addEventListener("change", (e) => {
   const vis = products.filter((x) => x.visible !== false).length;
   $("#counts").textContent = `${products.length} artículos · ${vis} visibles · ${products.length - vis} ocultos`;
   setDirty(true);
+});
+
+$("#publishAllPrices").addEventListener("click", () => {
+  let count = 0;
+  products.forEach(p => { if (Number(p.price) > 0) { p.pricePublished = true; count++; } });
+  renderRows(); setDirty(true);
+  $("#status").textContent = count + " precios listos para publicar. Guardá los cambios.";
+});
+$("#unpublishAllPrices").addEventListener("click", () => {
+  products.forEach(p => { p.pricePublished = false; });
+  renderRows(); setDirty(true);
+  $("#status").textContent = "Todos los precios quedaron despublicados. Guardá los cambios.";
 });
 
 function deleteProduct(p) {

@@ -75,7 +75,7 @@ textarea{resize:vertical;min-height:84px}
 
 /* tabla */
 .table{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.row{display:grid;grid-template-columns:78px 64px minmax(0,2fr) minmax(0,1.4fr) minmax(0,1fr) 170px;gap:14px;align-items:center;padding:10px 14px;border-bottom:1px solid #eee}
+.row{display:grid;grid-template-columns:78px 64px minmax(0,2fr) minmax(0,1.4fr) minmax(0,1fr) minmax(145px,1.2fr) 170px;gap:14px;align-items:center;padding:10px 14px;border-bottom:1px solid #eee}
 .row.head{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:#faf9f5}
 .row:last-child{border-bottom:0}
 .row.hidden-item{background:#faf9f5}
@@ -89,6 +89,7 @@ textarea{resize:vertical;min-height:84px}
 .sec b{display:block;font-size:13px}
 .sec small{color:var(--muted)}
 .brandcell{overflow-wrap:anywhere;color:#333}
+.pricecell{display:flex;flex-direction:column;gap:5px;font-size:13px}.pricecell>b{white-space:nowrap}.pricecell label{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:700}.pricecell input{width:17px;height:17px;margin:0;accent-color:var(--purple)}
 .acts{display:flex;gap:6px;justify-content:flex-end}
 
 /* secciones y categorías */
@@ -128,7 +129,7 @@ dialog form{padding:22px}
 @media(max-width:900px){
   .filters{grid-template-columns:1fr 1fr}
   .filters input{grid-column:1/-1}
-  .row{grid-template-columns:70px 56px minmax(0,1.6fr) minmax(0,1fr) 150px}
+  .row{grid-template-columns:70px 56px minmax(0,1.6fr) minmax(0,1fr) minmax(135px,1.1fr) 150px}
   .row .brandcell{display:none}
   .row.head span:nth-child(5){display:none}
 }
@@ -149,11 +150,12 @@ dialog form{padding:22px}
 
   /* filas como tarjetas */
   .row.head{display:none}
-  .row{grid-template-columns:64px minmax(0,1fr);grid-template-areas:"img name" "img sec" "img brand" "vis acts";gap:2px 12px;padding:12px}
+  .row{grid-template-columns:64px minmax(0,1fr);grid-template-areas:"img name" "img sec" "img brand" "img price" "vis acts";gap:2px 12px;padding:12px}
   .row .thumb{grid-area:img;width:64px;height:64px}
   .row .name{grid-area:name}
   .row .sec{grid-area:sec}
   .row .brandcell{grid-area:brand;display:block;font-size:13px}
+  .row .pricecell{grid-area:price;display:flex;flex-direction:row;align-items:center;gap:10px;font-size:13px;margin-top:5px}
   .row .vis{grid-area:vis;margin-top:10px}
   .row .acts{grid-area:acts;margin-top:10px}
 
