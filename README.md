@@ -15,7 +15,8 @@ Proyecto separado de DECANTS PARANÁ. Base inicial de 63 códigos extraídos del
 4. Crear un KV exclusivo: `npx wrangler kv namespace create MURADOR` y copiar su ID en `wrangler.jsonc`. El binding se llama `MURADOR` y debe apuntar al namespace nuevo de Murador, nunca al de Decants.
 5. Configurar secretos del Worker: `npx wrangler secret put ADMIN_USER`, `npx wrangler secret put ADMIN_PASSWORD` y `npx wrangler secret put ADMIN_SESSION_SECRET` (opcional).
 6. Para habilitar el checkout de Mercado Pago, cargar el Access Token de producción con el comando npx wrangler secret put MERCADOPAGO_ACCESS_TOKEN. El secreto se usa únicamente en el Worker; nunca se expone al navegador. Sin este secreto, el checkout muestra un mensaje de configuración pendiente y sigue disponible la solicitud de cuotas por WhatsApp.
-7. Ejecutar npm run dev para revisar; luego npm run deploy.
+7. Para probar el sandbox en el Worker desplegado, usa el Access Token de prueba como secreto MERCADOPAGO_ACCESS_TOKEN y agrega la variable de texto MERCADOPAGO_MODE con valor test. El Worker redirigirá al enlace sandbox_init_point. Para ventas reales, cambia el secreto por el Access Token de producción y define MERCADOPAGO_MODE como production.
+8. Ejecutar npm run dev para revisar; luego npm run deploy.
 
 ## URLs
 - Catálogo: `/`
