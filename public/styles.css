@@ -27,7 +27,7 @@ button,input,select{font:inherit}
   object-fit: contain;
 }
 
-nav{display:flex;gap:28px;font-size:13px;font-weight:600;white-space:nowrap}
+nav{display:flex;flex:1;justify-content:center;gap:28px;margin:0 36px;font-size:13px;font-weight:600;white-space:nowrap}
 .header-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
 .cart{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:0;background:#7b3f97;color:#fff;padding:9px 11px;border-radius:999px;cursor:pointer;line-height:1;white-space:nowrap}
 .cart:hover{background:#65327d}
