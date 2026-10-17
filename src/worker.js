@@ -113,6 +113,15 @@ async function getProducts(env, req, { persistSeed = true } = {}) {
   if (!data) {
     data = normalizeSeed(await seedFile(env, req, "seed-products.json"));
     if (persistSeed) await env.MURADOR.put(PRODUCTS_KEY, JSON.stringify(data));
+  } else {
+    // Incorpora los precios base del seed a catálogos ya persistidos en KV sin publicarlos.
+    const seed = await seedFile(env, req, "seed-products.json");
+    const defaults = new Map(seed.map((p) => [p.id, p]));
+    data = data.map((p) => {
+      const initial = defaults.get(p.id);
+      const price = p.price === undefined ? (initial?.price ?? null) : (p.price === null || p.price === "" ? null : Number.isFinite(Number(p.price)) ? Number(p.price) : null);
+      return { ...p, price, pricePublished: p.pricePublished === true };
+    });
   }
   return data;
 }
@@ -132,6 +141,7 @@ function cleanProduct(p) {
   if (!code) throw new HttpError(400, "Cada artículo necesita un código.");
   if (!name) throw new HttpError(400, `El artículo ${code} necesita un nombre.`);
   if (!line) throw new HttpError(400, `El artículo ${code} necesita una sección.`);
+  if (p.price !== null && p.price !== "" && p.price !== undefined && (!Number.isFinite(Number(p.price)) || Number(p.price) < 0 || Number(p.price) > 100000000000)) throw new HttpError(400, `Precio inválido para ${code}.`);
   return {
     id: safeId(txt(p.id, 120) || code.toLowerCase()),
     code, name, line,
@@ -140,7 +150,9 @@ function cleanProduct(p) {
     description: txt(p.description, 1500),
     image: txt(p.image, 400),
     visible: p.visible !== false,
-    featured: p.featured === true
+    featured: p.featured === true,
+    price: p.price === null || p.price === "" || p.price === undefined ? null : Math.round(Number(p.price)),
+    pricePublished: p.pricePublished === true
   };
 }
 
@@ -214,7 +226,8 @@ async function handle(req, env, ctx) {
     if (method === "GET" && path === "catalog") {
       const [products, settings] = await Promise.all([getProducts(env, req, { persistSeed: false }), getSettings(env, req)]);
       const visible = products.filter((p) => p.visible !== false);
-      return json({ products: visible, settings, taxonomy: await getTaxonomy(env, visible) }, 200, { "cache-control": "no-store" });
+      const publicProducts = visible.map((p) => p.pricePublished === true ? p : { ...p, price: null });
+      return json({ products: publicProducts, settings, taxonomy: await getTaxonomy(env, visible) }, 200, { "cache-control": "no-store" });
     }
     if (path === "customer" && (method === "GET" || method === "PUT")) {
       requireKV(env);
@@ -260,6 +273,34 @@ async function handle(req, env, ctx) {
     if (method === "GET" && path.startsWith("image/")) {
       requireKV(env);
       return serveImage(env, req, ctx, safeId(decode(path.slice(6))));
+    }
+    if (method === "POST" && path === "checkout") {
+      requireKV(env);
+      if (!env.MERCADOPAGO_ACCESS_TOKEN) throw new HttpError(503, "El pago online todavía no está configurado. Podés solicitar cuotas personalizadas por WhatsApp.");
+      const body = await req.json().catch(() => ({}));
+      const requested = Array.isArray(body.items) ? body.items.slice(0, 50) : [];
+      if (!requested.length) throw new HttpError(400, "El carrito está vacío.");
+      const products = await getProducts(env, req);
+      const byId = new Map(products.map((p) => [p.id, p]));
+      const items = requested.map((entry) => {
+        const p = byId.get(txt(entry.id, 120));
+        const quantity = Math.floor(Number(entry.quantity));
+        if (!p || p.visible === false || p.pricePublished !== true || !Number.isFinite(Number(p.price)) || Number(p.price) <= 0) throw new HttpError(400, "Hay artículos del carrito sin precio publicado o no disponibles.");
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > 20) throw new HttpError(400, "Cantidad inválida.");
+        return { id: p.id, title: `${p.code} · ${p.name}`.slice(0, 256), quantity, currency_id: "ARS", unit_price: Number(p.price) };
+      });
+      const origin = url.origin;
+      const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
+        method: "POST",
+        headers: { "authorization": `Bearer ${env.MERCADOPAGO_ACCESS_TOKEN}`, "content-type": "application/json" },
+        body: JSON.stringify({ items, external_reference: crypto.randomUUID(), back_urls: { success: `${origin}/?pago=aprobado`, failure: `${origin}/?pago=rechazado`, pending: `${origin}/?pago=pendiente` }, auto_return: "approved" })
+      });
+      const preference = await response.json().catch(() => ({}));
+      if (!response.ok || !preference.init_point) {
+        console.error("Mercado Pago preference error", response.status, preference.message || preference.error || "");
+        throw new HttpError(502, "No se pudo iniciar el pago con Mercado Pago. Intentá nuevamente o solicitá cuotas por WhatsApp.");
+      }
+      return json({ initPoint: preference.init_point });
     }
 
     if (!(await validSession(env, req))) return json({ error: "No autorizado." }, 401);
