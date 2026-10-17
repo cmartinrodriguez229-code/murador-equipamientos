@@ -148,6 +148,18 @@
           <textarea id="fDesc" rows="3" maxlength="1500" placeholder="Croma 31kg Torre PPI Visor LED"></textarea>
         </label>
 
+        <div class="price-controls">
+          <label>Precio publicado (ARS)
+            <input id="fPrice" type="number" min="0" step="1" inputmode="numeric" placeholder="Ej.: 455000">
+          </label>
+          <fieldset class="publish-choice">
+            <legend>Publicar precio en el sitio</legend>
+            <label><input type="radio" name="pricePublished" value="yes" id="fPriceYes"> Publicar precio</label>
+            <label><input type="radio" name="pricePublished" value="no" id="fPriceNo"> No publicar (consultar precio)</label>
+          </fieldset>
+        </div>
+        <small class="price-note">El valor inicial proviene del precio estimado en la planilla. Revisalo antes de publicarlo.</small>
+
         <label class="check">
           <input id="fVisibleChk" type="checkbox" checked>
           <span>Mostrar este artículo en el sitio</span>

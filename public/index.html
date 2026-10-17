@@ -37,6 +37,9 @@
         <a href="#datos">Tus datos</a>
         <a href="#contacto">Contacto</a>
     </nav>
+    <button id="cartOpen" class="cart" type="button" aria-label="Abrir carrito">
+        <span class="cart-label">Carrito</span> <b id="cartCount">0</b>
+    </button>
     <button id="favOpen" class="cart" type="button" aria-label="Abrir favoritos">
         <svg class="heart-ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="cart-label">Favoritos</span> <b id="favCount">0</b>
@@ -67,7 +70,7 @@
         <div class="lines-body">
             <h2>Qué vas a encontrar</h2>
             <div id="lineButtons" class="linebuttons"></div>
-            <p class="lines-note">Cada equipo lleva un código de referencia. Escribinos ese código por WhatsApp y te pasamos precio, disponibilidad y financiación.</p>
+            <p class="lines-note">Cada equipo lleva un código de referencia. En los artículos sin precio publicado, escribinos ese código por WhatsApp y te pasamos precio, disponibilidad y financiación.</p>
         </div>
     </section>
     <section id="catalogo" class="catalog">
@@ -159,6 +162,20 @@
         <h2 id="favTitle">Favoritos</h2>
         <div id="favItems"></div>
         <div class="favfoot"><button id="favConsult" class="btn dark favconsult" type="button">CONSULTAR</button></div>
+    </div>
+</div>
+
+<div id="cartPanel" class="cartpanel" hidden>
+    <div class="cartbox" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+        <button id="cartClose" class="close" type="button" aria-label="Cerrar">×</button>
+        <p class="kicker">TU PEDIDO</p>
+        <h2 id="cartTitle">Carrito</h2>
+        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-subtotal"><span>Subtotal</span><strong id="cartSubtotal">$ 0</strong></div>
+        <div class="favfoot cart-actions">
+          <button id="checkoutBtn" class="btn dark favconsult" type="button">PAGAR CON MERCADO PAGO</button>
+          <button id="installmentsBtn" class="btn favconsult" type="button">SOLICITAR CUOTAS PERSONALIZADAS</button>
+        </div>
     </div>
 </div>
 

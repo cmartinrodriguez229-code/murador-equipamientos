@@ -15,9 +15,11 @@ const PAGE_SIZE = 8;
 let page = 1;
 
 let all = [],
-    favs = JSON.parse(localStorage.getItem("murador_favs") || "[]");
+    favs = JSON.parse(localStorage.getItem("murador_favs") || "[]"),
+    cart = JSON.parse(localStorage.getItem("murador_cart") || "{}");
 
 const wa = "5493434627755";
+const money = value => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(Number(value) || 0);
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({
   "&": "&amp;",
@@ -134,8 +136,25 @@ function render() {
     </article>
   `).join("");
 
+  $("#products").querySelectorAll("[data-wa]").forEach(b => {
+    const p = all.find(x => x.id === b.dataset.wa);
+    if (!p || p.pricePublished !== true || !(Number(p.price) > 0)) return;
+    const price = document.createElement("div");
+    price.className = "published-price";
+    price.textContent = money(p.price);
+    const add = document.createElement("button");
+    add.className = "consult add-cart";
+    add.dataset.add = p.id;
+    add.textContent = "AGREGAR AL CARRITO";
+    b.replaceWith(price, add);
+  });
+
   $("#products").querySelectorAll("[data-fav]").forEach(b => {
     b.onclick = () => toggleFav(b.dataset.fav);
+  });
+
+  $("#products").querySelectorAll("[data-add]").forEach(b => {
+    b.onclick = () => addToCart(b.dataset.add);
   });
 
   $("#products").querySelectorAll("[data-wa]").forEach(b => {
@@ -355,6 +374,98 @@ $("#favOpen").onclick = openFavs;
 $("#favClose").onclick = closeFavs;
 $("#favPanel").onclick = e => { if (e.target.id === "favPanel") closeFavs(); };
 
+/* ---------- CARRITO Y PAGO ---------- */
+function saveCart() {
+  localStorage.setItem("murador_cart", JSON.stringify(cart));
+  renderCart();
+}
+function addToCart(id) {
+  const p = all.find(x => x.id === id);
+  if (!p || p.pricePublished !== true || !(Number(p.price) > 0)) return;
+  cart[id] = Math.min(20, (Number(cart[id]) || 0) + 1);
+  saveCart();
+  openCart();
+}
+function cartItems() {
+  return Object.entries(cart).map(([id, quantity]) => {
+    const p = all.find(x => x.id === id);
+    return p && p.pricePublished === true && p.visible !== false ? { ...p, quantity: Number(quantity) || 1 } : null;
+  }).filter(Boolean);
+}
+function renderCart() {
+  const items = cartItems();
+  const count = items.reduce((n, p) => n + p.quantity, 0);
+  $("#cartCount").textContent = count;
+  const host = $("#cartItems");
+  host.innerHTML = "";
+  if (!items.length) host.innerHTML = '<p class="favempty">Todavía no agregaste artículos con precio publicado.</p>';
+  items.forEach(p => {
+    const row = document.createElement("div");
+    row.className = "cartrow";
+    row.innerHTML = '<div class="cartinfo"><b></b><small></small></div><div class="cartqty"><button data-qty data-delta="-1" aria-label="Quitar una unidad">−</button><span></span><button data-qty data-delta="1" aria-label="Agregar una unidad">+</button></div><button class="favremove" data-cart-remove aria-label="Quitar artículo">×</button>';
+    row.querySelector(".cartinfo b").textContent = p.name;
+    row.querySelector(".cartinfo small").textContent = p.code + " · " + money(p.price) + " c/u";
+    row.querySelector(".cartqty span").textContent = p.quantity;
+    row.querySelectorAll("[data-qty]").forEach(b => b.dataset.id = p.id);
+    row.querySelector("[data-cart-remove]").dataset.id = p.id;
+    host.append(row);
+  });
+  $("#cartSubtotal").textContent = money(items.reduce((n, p) => n + p.price * p.quantity, 0));
+  $("#checkoutBtn").disabled = !items.length;
+  $("#installmentsBtn").disabled = !items.length;
+}
+$("#cartItems").addEventListener("click", e => {
+  const qty = e.target.closest("[data-qty]");
+  const remove = e.target.closest("[data-cart-remove]");
+  if (remove) delete cart[remove.dataset.id];
+  else if (qty) {
+    const id = qty.dataset.id;
+    cart[id] = Math.max(0, Math.min(20, (Number(cart[id]) || 0) + Number(qty.dataset.delta)));
+    if (!cart[id]) delete cart[id];
+  } else return;
+  saveCart();
+});
+async function checkout() {
+  const items = cartItems();
+  if (!items.length) return;
+  const btn = $("#checkoutBtn");
+  btn.disabled = true;
+  btn.textContent = "Conectando con Mercado Pago…";
+  try {
+    const r = await fetch("/api/checkout", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ items: items.map(p => ({ id: p.id, quantity: p.quantity })) }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || "No se pudo iniciar el pago.");
+    location.href = d.initPoint;
+  } catch (e) {
+    alert(e.message);
+    btn.disabled = false;
+    btn.textContent = "PAGAR CON MERCADO PAGO";
+  }
+}
+function requestInstallments() {
+  const items = cartItems();
+  if (!items.length) return;
+  const lines = items.map(p => "• " + p.code + " — " + p.name + " x" + p.quantity + " — " + money(p.price * p.quantity)).join("\n");
+  const total = items.reduce((n, p) => n + p.price * p.quantity, 0);
+  const text = "Hola Murador Equipamientos, quisiera solicitar cuotas personalizadas para este pedido:\n" + lines + "\nTotal estimado: " + money(total);
+  window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(text), "_blank", "noopener");
+}
+function openCart() {
+  renderCart();
+  $("#cartPanel").hidden = false;
+  document.body.classList.add("modal-open");
+}
+function closeCart() {
+  $("#cartPanel").hidden = true;
+  document.body.classList.remove("modal-open");
+}
+$("#cartOpen").onclick = openCart;
+$("#cartClose").onclick = closeCart;
+$("#cartPanel").onclick = e => { if (e.target.id === "cartPanel") closeCart(); };
+$("#checkoutBtn").onclick = checkout;
+$("#installmentsBtn").onclick = requestInstallments;
+renderCart();
+
 /* ---------- FOTO AMPLIADA ---------- */
 function openLightbox(src, alt) {
   $("#lbImg").src = src;
@@ -386,6 +497,7 @@ document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if (!$("#lightbox").hidden) closeLightbox();
   else if (!$("#favPanel").hidden) closeFavs();
+  else if (!$("#cartPanel").hidden) closeCart();
 });
 
 ["#search", "#lineFilter", "#categoryFilter", "#brandFilter"].forEach(s => {

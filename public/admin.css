@@ -162,3 +162,6 @@ dialog form{padding:22px}
   dialog form{padding:16px}
   .dlg-actions .btn{flex:1}
 }
+
+.price-controls{display:grid;grid-template-columns:minmax(160px,1fr) minmax(230px,1.2fr);gap:12px;align-items:start;margin-top:8px}.price-controls input[type=number]{display:block;width:100%;margin-top:6px;padding:11px 12px;border:1px solid #cfcabb;background:#fff;border-radius:8px;font-size:16px}.publish-choice{border:1px solid var(--line);border-radius:8px;padding:8px 12px 2px;margin:0}.publish-choice legend{font-size:13px;font-weight:700;padding:0 4px}.publish-choice label{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;margin:4px 0 8px}.publish-choice input{accent-color:var(--purple)}.price-note{display:block;margin:-4px 0 14px;color:var(--muted);font-size:12px}
+@media(max-width:700px){.price-controls{grid-template-columns:1fr}}

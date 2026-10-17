@@ -198,6 +198,9 @@ function openForm(p) {
   $("#fBrand").value = p ? p.brand : "";
   $("#fName").value = p ? p.name : "";
   $("#fDesc").value = p ? p.description : "";
+  $("#fPrice").value = p && p.price != null ? p.price : "";
+  $("#fPriceYes").checked = !!(p && p.pricePublished === true);
+  $("#fPriceNo").checked = !(p && p.pricePublished === true);
   $("#fVisibleChk").checked = p ? p.visible !== false : true;
   $("#fFile").value = "";
   showPreview(form.preview);
@@ -266,6 +269,8 @@ $("#productForm").addEventListener("submit", (e) => {
   if (!line) return err("Elegí una sección.");
   if (!code) return err("Completá el código.");
   if (!name) return err("Completá el nombre.");
+  if ($("#fPrice").value !== "" && (!Number.isFinite(Number($("#fPrice").value)) || Number($("#fPrice").value) < 0)) return err("Ingresá un precio válido en pesos.");
+  if ($("#fPriceYes").checked && Number($("#fPrice").value) <= 0) return err("Para publicar, ingresá un precio mayor a cero.");
   if (products.some((p) => p !== editing && p.code.toLowerCase() === code.toLowerCase())) return err(`Ya existe un artículo con el código ${code}.`);
 
   const p = editing || { id: uniqueId(code), featured: false };
@@ -273,6 +278,8 @@ $("#productForm").addEventListener("submit", (e) => {
     line, category, code, name,
     brand: $("#fBrand").value.trim(),
     description: $("#fDesc").value.trim(),
+    price: $("#fPrice").value === "" ? null : Number($("#fPrice").value),
+    pricePublished: $("#fPriceYes").checked && Number($("#fPrice").value) > 0,
     visible: $("#fVisibleChk").checked
   });
   if (form.file) { p._file = form.file; p._preview = form.preview; p._clear = false; }

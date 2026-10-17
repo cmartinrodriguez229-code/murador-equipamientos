@@ -9,7 +9,9 @@
     "description": "",
     "image": "/assets/products/ind-01.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 455000,
+    "pricePublished": false
   },
   {
     "id": "ind-16",
@@ -21,7 +23,9 @@
     "description": "",
     "image": "/assets/products/IND-16.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 180000,
+    "pricePublished": false
   },
   {
     "id": "ind-17",
@@ -33,7 +37,9 @@
     "description": "",
     "image": "/assets/products/IND-17.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 300000,
+    "pricePublished": false
   },
   {
     "id": "ind-02",
@@ -45,7 +51,9 @@
     "description": "",
     "image": "/assets/products/IND-02.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 450000,
+    "pricePublished": false
   },
   {
     "id": "ind-03",
@@ -57,7 +65,9 @@
     "description": "",
     "image": "/assets/products/IND-03.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1400000,
+    "pricePublished": false
   },
   {
     "id": "ind-08",
@@ -69,7 +79,9 @@
     "description": "",
     "image": "/assets/products/IND-08.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 900000,
+    "pricePublished": false
   },
   {
     "id": "ind-10",
@@ -81,7 +93,9 @@
     "description": "",
     "image": "/assets/products/IND-10.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 2600000,
+    "pricePublished": false
   },
   {
     "id": "ind-04",
@@ -93,7 +107,9 @@
     "description": "",
     "image": "/assets/products/IND-04.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1100000,
+    "pricePublished": false
   },
   {
     "id": "ind-05",
@@ -105,7 +121,9 @@
     "description": "",
     "image": "/assets/products/IND-05.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1271000,
+    "pricePublished": false
   },
   {
     "id": "ind-06",
@@ -117,7 +135,9 @@
     "description": "",
     "image": "/assets/products/IND-06.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1500000,
+    "pricePublished": false
   },
   {
     "id": "ind-07",
@@ -129,7 +149,9 @@
     "description": "",
     "image": "/assets/products/IND-07.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1700000,
+    "pricePublished": false
   },
   {
     "id": "ind-09",
@@ -141,7 +163,9 @@
     "description": "",
     "image": "/assets/products/IND-09.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1500000,
+    "pricePublished": false
   },
   {
     "id": "ind-18",
@@ -153,7 +177,9 @@
     "description": "",
     "image": "/assets/products/IND-18.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 2400000,
+    "pricePublished": false
   },
   {
     "id": "ind-19",
@@ -165,7 +191,9 @@
     "description": "",
     "image": "/assets/products/IND-19.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 2100000,
+    "pricePublished": false
   },
   {
     "id": "ind-20",
@@ -177,7 +205,9 @@
     "description": "",
     "image": "/assets/products/IND-20.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 350000,
+    "pricePublished": false
   },
   {
     "id": "ind-21",
@@ -189,7 +219,9 @@
     "description": "",
     "image": "/assets/products/IND-21.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1000000,
+    "pricePublished": false
   },
   {
     "id": "ind-22",
@@ -201,7 +233,9 @@
     "description": "",
     "image": "/assets/products/IND-22.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1090000,
+    "pricePublished": false
   },
   {
     "id": "ind-11",
@@ -213,7 +247,9 @@
     "description": "",
     "image": "/assets/products/IND-11.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 2152605,
+    "pricePublished": false
   },
   {
     "id": "ind-12",
@@ -225,7 +261,9 @@
     "description": "",
     "image": "/assets/products/IND-12.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1250000,
+    "pricePublished": false
   },
   {
     "id": "ind-13",
@@ -237,7 +275,9 @@
     "description": "",
     "image": "/assets/products/IND-13.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1474000,
+    "pricePublished": false
   },
   {
     "id": "ind-14",
@@ -249,7 +289,9 @@
     "description": "",
     "image": "/assets/products/IND-14.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 2734000,
+    "pricePublished": false
   },
   {
     "id": "ind-15",
@@ -261,7 +303,9 @@
     "description": "",
     "image": "/assets/products/IND-15.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 300000,
+    "pricePublished": false
   },
   {
     "id": "ind-24",
@@ -273,7 +317,9 @@
     "description": "",
     "image": "/assets/products/IND-24.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 650000,
+    "pricePublished": false
   },
   {
     "id": "ind-23",
@@ -285,7 +331,9 @@
     "description": "",
     "image": "/assets/products/IND-23.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 180000,
+    "pricePublished": false
   },
   {
     "id": "hog-01",
@@ -297,7 +345,9 @@
     "description": "",
     "image": "/assets/products/hog-01.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 380000,
+    "pricePublished": false
   },
   {
     "id": "hog-02",
@@ -309,7 +359,9 @@
     "description": "",
     "image": "/assets/products/hog-02.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 249049,
+    "pricePublished": false
   },
   {
     "id": "hog-03",
@@ -321,7 +373,9 @@
     "description": "",
     "image": "/assets/products/hog-03.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 280000,
+    "pricePublished": false
   },
   {
     "id": "hog-06",
@@ -333,7 +387,9 @@
     "description": "",
     "image": "/assets/products/hog-06.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 800000,
+    "pricePublished": false
   },
   {
     "id": "hog-04",
@@ -345,7 +401,9 @@
     "description": "",
     "image": "/assets/products/hog-04.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1100000,
+    "pricePublished": false
   },
   {
     "id": "hog-05",
@@ -357,7 +415,9 @@
     "description": "",
     "image": "/assets/products/hog-05.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 850000,
+    "pricePublished": false
   },
   {
     "id": "hog-07",
@@ -369,7 +429,9 @@
     "description": "",
     "image": "/assets/products/hog-07.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 60000,
+    "pricePublished": false
   },
   {
     "id": "hog-08",
@@ -381,7 +443,9 @@
     "description": "",
     "image": "/assets/products/hog-08.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 180000,
+    "pricePublished": false
   },
   {
     "id": "hog-09",
@@ -393,7 +457,9 @@
     "description": "",
     "image": "/assets/products/hog-09.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 95000,
+    "pricePublished": false
   },
   {
     "id": "hog-10",
@@ -405,7 +471,9 @@
     "description": "",
     "image": "/assets/products/hog-10.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 129999,
+    "pricePublished": false
   },
   {
     "id": "hog-11",
@@ -417,7 +485,9 @@
     "description": "",
     "image": "/assets/products/hog-11.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 100000,
+    "pricePublished": false
   },
   {
     "id": "hog-12",
@@ -429,7 +499,9 @@
     "description": "",
     "image": "/assets/products/hog-12.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 80000,
+    "pricePublished": false
   },
   {
     "id": "hog-13",
@@ -441,7 +513,9 @@
     "description": "",
     "image": "/assets/products/hog-13.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 70000,
+    "pricePublished": false
   },
   {
     "id": "hog-14",
@@ -453,7 +527,9 @@
     "description": "",
     "image": "/assets/products/hog-14.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1900000,
+    "pricePublished": false
   },
   {
     "id": "hog-15",
@@ -465,7 +541,9 @@
     "description": "",
     "image": "/assets/products/hog-15.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 85000,
+    "pricePublished": false
   },
   {
     "id": "hog-18",
@@ -477,7 +555,9 @@
     "description": "",
     "image": "/assets/products/hog-18.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 70000,
+    "pricePublished": false
   },
   {
     "id": "hog-19",
@@ -489,7 +569,9 @@
     "description": "",
     "image": "/assets/products/hog-19.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 90000,
+    "pricePublished": false
   },
   {
     "id": "hog-16",
@@ -501,7 +583,9 @@
     "description": "",
     "image": "/assets/products/hog-16.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1200000,
+    "pricePublished": false
   },
   {
     "id": "hog-17",
@@ -513,7 +597,9 @@
     "description": "",
     "image": "/assets/products/hog-17.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1059999,
+    "pricePublished": false
   },
   {
     "id": "hog-20",
@@ -525,7 +611,9 @@
     "description": "",
     "image": "/assets/products/hog-20.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 700000,
+    "pricePublished": false
   },
   {
     "id": "hog-21",
@@ -537,7 +625,9 @@
     "description": "",
     "image": "/assets/products/hog-21.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 550000,
+    "pricePublished": false
   },
   {
     "id": "hog-22",
@@ -549,7 +639,9 @@
     "description": "",
     "image": "/assets/products/hog-22.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 800000,
+    "pricePublished": false
   },
   {
     "id": "ext-01",
@@ -561,7 +653,9 @@
     "description": "",
     "image": "/assets/products/ext-01.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 500000,
+    "pricePublished": false
   },
   {
     "id": "ext-02",
@@ -573,7 +667,9 @@
     "description": "",
     "image": "/assets/products/ext-02.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 450000,
+    "pricePublished": false
   },
   {
     "id": "ext-03",
@@ -585,7 +681,9 @@
     "description": "",
     "image": "/assets/products/ext-03.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 450000,
+    "pricePublished": false
   },
   {
     "id": "ext-04",
@@ -597,7 +695,9 @@
     "description": "",
     "image": "/assets/products/ext-04.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 500000,
+    "pricePublished": false
   },
   {
     "id": "ext-05",
@@ -609,7 +709,9 @@
     "description": "",
     "image": "/assets/products/ext-05.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 180000,
+    "pricePublished": false
   },
   {
     "id": "ext-06",
@@ -621,7 +723,9 @@
     "description": "",
     "image": "/assets/products/ext-06.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 120000,
+    "pricePublished": false
   },
   {
     "id": "ext-09",
@@ -633,7 +737,9 @@
     "description": "",
     "image": "/assets/products/ext-09.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 235000,
+    "pricePublished": false
   },
   {
     "id": "ext-07",
@@ -645,7 +751,9 @@
     "description": "",
     "image": "/assets/products/ext-07.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 350000,
+    "pricePublished": false
   },
   {
     "id": "ext-08",
@@ -657,7 +765,9 @@
     "description": "",
     "image": "/assets/products/ext-08.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 180000,
+    "pricePublished": false
   },
   {
     "id": "tec-01",
@@ -669,7 +779,9 @@
     "description": "",
     "image": "/assets/products/tec-01.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1500000,
+    "pricePublished": false
   },
   {
     "id": "tec-02",
@@ -681,7 +793,9 @@
     "description": "",
     "image": "/assets/products/tec-02.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 1755748,
+    "pricePublished": false
   },
   {
     "id": "tec-03",
@@ -693,7 +807,9 @@
     "description": "",
     "image": "/assets/products/tec-03.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 600000,
+    "pricePublished": false
   },
   {
     "id": "tec-04",
@@ -705,7 +821,9 @@
     "description": "",
     "image": "/assets/products/tec-04.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 2500000,
+    "pricePublished": false
   },
   {
     "id": "her-01",
@@ -717,7 +835,9 @@
     "description": "",
     "image": "/assets/products/her-01.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 320000,
+    "pricePublished": false
   },
   {
     "id": "her-03",
@@ -729,7 +849,9 @@
     "description": "",
     "image": "/assets/products/her-03.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 450000,
+    "pricePublished": false
   },
   {
     "id": "her-04",
@@ -741,7 +863,9 @@
     "description": "",
     "image": "/assets/products/her-04.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 320000,
+    "pricePublished": false
   },
   {
     "id": "her-02",
@@ -753,6 +877,8 @@
     "description": "",
     "image": "/assets/products/her-02.webp",
     "visible": true,
-    "featured": false
+    "featured": false,
+    "price": 450000,
+    "pricePublished": false
   }
 ]

@@ -469,3 +469,13 @@ body.modal-open{overflow:hidden}
 @media(max-width:340px){
   .products{grid-template-columns:1fr}
 }
+
+/* Precio publicado y carrito */
+.actions{display:flex;flex-direction:column;gap:10px}.published-price{font-size:22px;font-weight:800;text-align:center;color:#171717}
+.add-cart{background:#7b3f97!important;color:#fff!important}.add-cart:hover{background:#5e2c75!important}
+.cart-items{flex:1 1 auto;overflow:auto;min-height:0}
+.cartrow{display:grid;grid-template-columns:minmax(0,1fr) auto 34px;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #ddd9cd}
+.cartinfo b{display:block;font:700 15px/1.15 "Bjorn",sans-serif;text-transform:uppercase}.cartinfo small{display:block;margin-top:5px;color:#7b3f97;font-weight:700}
+.cartqty{display:flex;align-items:center;gap:8px}.cartqty button{width:30px;height:30px;border:1px solid #aaa;background:#fff;border-radius:50%;font-weight:800;cursor:pointer}
+.cart-subtotal{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid #ccc;font-size:17px}.cart-subtotal strong{font-size:20px}
+.cart-actions{display:grid;gap:8px}.cart-actions .favconsult{margin:0;padding:13px 8px}
