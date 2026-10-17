@@ -290,17 +290,19 @@ async function handle(req, env, ctx) {
         return { id: p.id, title: `${p.code} · ${p.name}`.slice(0, 256), quantity, currency_id: "ARS", unit_price: Number(p.price) };
       });
       const origin = url.origin;
+      const testMode = String(env.MERCADOPAGO_MODE || "production").toLowerCase() === "test";
       const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
         method: "POST",
         headers: { "authorization": `Bearer ${env.MERCADOPAGO_ACCESS_TOKEN}`, "content-type": "application/json" },
         body: JSON.stringify({ items, external_reference: crypto.randomUUID(), back_urls: { success: `${origin}/?pago=aprobado`, failure: `${origin}/?pago=rechazado`, pending: `${origin}/?pago=pendiente` }, auto_return: "approved" })
       });
       const preference = await response.json().catch(() => ({}));
-      if (!response.ok || !preference.init_point) {
+      const checkoutUrl = testMode ? preference.sandbox_init_point : preference.init_point;
+      if (!response.ok || !checkoutUrl) {
         console.error("Mercado Pago preference error", response.status, preference.message || preference.error || "");
         throw new HttpError(502, "No se pudo iniciar el pago con Mercado Pago. Intentá nuevamente o solicitá cuotas por WhatsApp.");
       }
-      return json({ initPoint: preference.init_point });
+      return json({ initPoint: checkoutUrl });
     }
 
     if (!(await validSession(env, req))) return json({ error: "No autorizado." }, 401);
