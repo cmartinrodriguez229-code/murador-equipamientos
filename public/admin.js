@@ -386,6 +386,157 @@ $("#addSection").addEventListener("submit", (e) => {
   setDirty(true); renderAll();
 });
 
+/* ---------- importar planilla de precios ---------- */
+$("#uploadPriceSheet").addEventListener("click", () => {
+  if (dirty) return alert("Primero guardá o descartá los cambios pendientes antes de importar una planilla.");
+  $("#priceSheetFile").click();
+});
+
+function normalizedHeader(value) {
+  return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+function parseImportPrice(value) {
+  if (typeof value === "number") return Number.isFinite(value) && value >= 0 ? Math.round(value) : null;
+  let raw = String(value ?? "").trim().replace(/ARS/ig, "").replace(/\$/g, "").replace(/\s/g, "");
+  if (!raw) return null;
+  if (raw.includes(",") && raw.includes(".")) raw = raw.replace(/\./g, "").replace(",", ".");
+  else if (raw.includes(",")) raw = /,\d{1,2}$/.test(raw) ? raw.replace(",", ".") : raw.replace(/,/g, "");
+  else if ((raw.match(/\./g) || []).length > 1 || /\.\d{3}$/.test(raw)) raw = raw.replace(/\./g, "");
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? Math.round(n) : null;
+}
+function sheetColumns(rows) {
+  for (let i = 0; i < Math.min(rows.length, 20); i++) {
+    const headers = (rows[i] || []).map(normalizedHeader);
+    const find = (...names) => headers.findIndex(h => names.includes(h));
+    const code = find("codigo", "codigoproducto", "cod");
+    const name = find("nombre", "producto", "articulo", "nombreproducto");
+    const publishedPrice = find("preciopublicado", "preciopublicadoars", "precio");
+    const referencePrice = find("preciodereferenciaestimado", "preciodereferenciaestimadoars", "precioreferencia", "precioreferenciaestimado");
+    if (code >= 0 && name >= 0 && (publishedPrice >= 0 || referencePrice >= 0)) {
+      return {
+        headerRow: i, code, name,
+        line: find("seccion", "linea", "seccionlinea"),
+        category: find("categoria"),
+        brand: find("marca"),
+        description: find("descripcion"),
+        publishedPrice, referencePrice
+      };
+    }
+  }
+  return null;
+}
+function sheetCell(row, index) {
+  return index >= 0 ? String(row[index] ?? "").trim() : "";
+}
+async function importPriceWorkbook(file) {
+  const status = $("#priceImportStatus");
+  status.hidden = false;
+  status.className = "import-status";
+  status.textContent = "Leyendo la planilla…";
+  try {
+    if (file.size > 15 * 1024 * 1024) throw new Error("La planilla supera el límite de 15 MB.");
+    if (!window.XLSX) throw new Error("No se pudo cargar el lector de Excel. Revisá tu conexión e intentá de nuevo.");
+    const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: false });
+    const preferred = workbook.SheetNames.find(n => normalizedHeader(n) === "catalogo");
+    const sheetNames = preferred ? [preferred, ...workbook.SheetNames.filter(n => n !== preferred)] : workbook.SheetNames;
+    let selected = null, columns = null;
+    for (const name of sheetNames) {
+      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1, raw: true, defval: "" });
+      const found = sheetColumns(rows);
+      if (found) { selected = rows; columns = found; break; }
+    }
+    if (!selected || !columns) throw new Error("No encontré encabezados compatibles. La hoja debe incluir Código, Nombre y Precio publicado o Precio de referencia estimado.");
+
+    const incoming = [];
+    const seen = new Set();
+    for (const row of selected.slice(columns.headerRow + 1)) {
+      const code = sheetCell(row, columns.code);
+      if (!code) continue;
+      const key = code.toLocaleLowerCase("es-AR");
+      if (seen.has(key)) throw new Error("El código " + code + " aparece más de una vez en la planilla. Corregí los duplicados y volvé a subirla.");
+      seen.add(key);
+      const name = sheetCell(row, columns.name);
+      const line = sheetCell(row, columns.line);
+      if (!name || !line) throw new Error("El artículo " + code + " necesita Nombre y Sección para poder importarse.");
+      const primary = columns.publishedPrice >= 0 ? parseImportPrice(row[columns.publishedPrice]) : null;
+      const reference = columns.referencePrice >= 0 ? parseImportPrice(row[columns.referencePrice]) : null;
+      incoming.push({
+        code, name, line,
+        category: sheetCell(row, columns.category),
+        brand: sheetCell(row, columns.brand),
+        description: sheetCell(row, columns.description),
+        price: primary !== null ? primary : reference
+      });
+    }
+    if (!incoming.length) throw new Error("La hoja no contiene artículos para importar.");
+
+    const next = products.map(p => ({ ...p }));
+    const byCode = new Map(next.map(p => [p.code.toLocaleLowerCase("es-AR"), p]));
+    const ids = new Set(next.map(p => p.id));
+    let updated = 0, added = 0;
+    for (const item of incoming) {
+      let product = byCode.get(item.code.toLocaleLowerCase("es-AR"));
+      if (product) {
+        product.code = item.code;
+        product.name = item.name;
+        product.line = item.line;
+        if (item.category) product.category = item.category;
+        if (item.brand) product.brand = item.brand;
+        if (item.description) product.description = item.description;
+        if (item.price !== null) product.price = item.price;
+        updated++;
+      } else {
+        let id = slug(item.code), suffix = 2;
+        while (ids.has(id)) id = slug(item.code) + "-" + suffix++;
+        product = {
+          id, code: item.code, name: item.name, line: item.line,
+          category: item.category, brand: item.brand, description: item.description,
+          image: "", visible: true, featured: false, price: item.price, pricePublished: false
+        };
+        next.push(product);
+        ids.add(id);
+        byCode.set(item.code.toLocaleLowerCase("es-AR"), product);
+        added++;
+      }
+    }
+
+    for (const product of next) {
+      let section = sectionByName(product.line);
+      if (!section) {
+        section = { name: product.line, categories: [] };
+        taxonomy.sections.push(section);
+      }
+      if (product.category && !section.categories.includes(product.category)) section.categories.push(product.category);
+    }
+    products = next;
+    renderAll();
+    setDirty(true, "Planilla aplicada; guardando artículos…");
+    await saveAll();
+    if ($("#savebar").classList.contains("error")) {
+      status.className = "import-status error";
+      status.textContent = "La planilla se leyó, pero los cambios no se guardaron. " + $("#status").textContent;
+      return;
+    }
+
+    const importedCodes = new Set(incoming.map(item => item.code.toLocaleLowerCase("es-AR")));
+    const missing = products.filter(p => p.visible !== false && !importedCodes.has(p.code.toLocaleLowerCase("es-AR")));
+    const warning = missing.length
+      ? " Advertencia: " + missing.length + " artículo(s) visible(s) no incluido(s) en la planilla (se conservaron): " + missing.slice(0, 18).map(p => p.code + " — " + p.name).join("; ") + (missing.length > 18 ? "; y " + (missing.length - 18) + " más." : ".")
+      : " No quedaron artículos visibles fuera de la planilla.";
+    status.className = missing.length ? "import-status warning" : "import-status success";
+    status.textContent = "Importación completada: " + updated + " actualizado(s), " + added + " nuevo(s)." + warning;
+  } catch (err) {
+    status.className = "import-status error";
+    status.textContent = "No se importó la planilla: " + err.message;
+  }
+}
+$("#priceSheetFile").addEventListener("change", async e => {
+  const file = e.target.files?.[0];
+  e.target.value = "";
+  if (file) await importPriceWorkbook(file);
+});
+
 /* ---------- guardar ---------- */
 $("#saveAll").addEventListener("click", saveAll);
 async function saveAll() {

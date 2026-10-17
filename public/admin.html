@@ -60,8 +60,13 @@
         <h2>Artículos</h2>
         <p id="counts" class="muted"></p>
       </div>
-      <button class="btn dark" id="newProduct" type="button">+ Nuevo artículo</button>
+      <div class="product-tools">
+        <button class="btn" id="uploadPriceSheet" type="button">SUBIR PLANILLA DE PRECIOS ACTUALIZADOS</button>
+        <input id="priceSheetFile" type="file" accept=".xlsx,.xls,.csv" hidden>
+        <button class="btn dark" id="newProduct" type="button">+ Nuevo artículo</button>
+      </div>
     </div>
+    <div id="priceImportStatus" class="import-status" role="status" aria-live="polite" hidden></div>
 
     <div class="filters">
       <input id="q" type="search" placeholder="Buscar por código, nombre o marca…">
@@ -176,6 +181,7 @@
   </form>
 </dialog>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="/admin.js"></script>
 </body>
 </html>
