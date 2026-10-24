@@ -544,3 +544,18 @@ body.modal-open{overflow:hidden}
 .actions .add-cart{flex:1 1 0}
 .sheet-photo img{cursor:zoom-in}
 @media(max-width:640px){.actions button,.actions .consult,.actions .add-cart{flex:1 1 100%}}
+
+/* ===== 11. FICHA: PLAN 210 / cuotas diarias + CONSULTAR OTRA FINANCIACIÓN ===== */
+.sheet-pricebox{display:flex;flex-direction:column;gap:8px}
+.sheet-priceline{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.plan-badge{display:inline-block;background:#f2c400;color:#171717;border-left:8px solid #7b3f97;padding:8px 12px;font-weight:800;font-size:12px;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 1px 6px rgba(0,0,0,.12)}
+.sheet-installment{margin:0;padding:10px 14px;background:#fff;border:1px solid #171717;border-left:8px solid #f2c400;font-weight:700;font-size:15px;line-height:1.3;color:#171717}
+.sheet-installment strong{font-size:22px;font-weight:800;color:#7b3f97;white-space:nowrap}
+.sheet-finance{width:100%;padding:14px;border:2px solid #7b3f97;background:#fff;color:#7b3f97;font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.sheet-finance[hidden]{display:none}
+.sheet-finance:hover{background:#7b3f97;color:#fff}
+.sheet-finance:focus-visible{outline:3px solid #f2c400;outline-offset:2px}
+@media(max-width:700px){
+  .plan-badge{font-size:11px;padding:7px 10px}
+  .sheet-installment strong{font-size:20px}
+}

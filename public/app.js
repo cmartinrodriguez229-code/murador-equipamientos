@@ -19,6 +19,21 @@ let all = [],
     cart = JSON.parse(localStorage.getItem("murador_cart") || "{}");
 
 const wa = "5493434627755";
+
+/* ---------- PLAN 210 (cuotas diarias) ---------- */
+const PLAN_DIAS = 210;
+// Cuota diaria redondeada hacia arriba. Usa la columna "Redondeo de cuota (ARS)" de la planilla
+// si el admin la envía; si no, para Inelro la calcula como precio / 210 (misma fórmula de la lista).
+// Por ahora SOLO aplica a la lista Inelro; el resto de las marcas queda como estaba.
+function dailyInstallment(p) {
+  if (String(p.brand || "").toLowerCase() !== "inelro") return 0;
+  for (const k of ["installment", "dailyInstallment", "cuotaDiaria", "cuota", "redondeoCuota"]) {
+    const v = Number(p[k]);
+    if (v > 0) return Math.round(v);
+  }
+  if (Number(p.price) > 0) return Math.ceil(Number(p.price) / PLAN_DIAS - 1e-9);
+  return 0;
+}
 const money = value => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(Number(value) || 0);
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({
@@ -493,7 +508,14 @@ function openSheet(id) {
   $("#sheetMeta").textContent = [p.brand, p.category].filter(Boolean).join(" · ");
   $("#sheetDesc").textContent = p.description || "Consultanos por especificaciones, precio y disponibilidad.";
   $("#sheetPrice").textContent = priced ? money(p.price) : "";
-  $("#sheetPrice").hidden = !priced;
+  $("#sheetPriceBox").hidden = !priced;
+  const cuota = priced ? dailyInstallment(p) : 0;
+  $("#sheetPlanBadge").hidden = !cuota;
+  $("#sheetInstallment").hidden = !cuota;
+  $("#sheetInstallment").innerHTML = cuota ? PLAN_DIAS + " cuotas diarias de <strong>" + esc(money(cuota)) + "</strong>" : "";
+  const fin = $("#sheetFinance");
+  fin.hidden = !cuota;
+  fin.dataset.id = p.id;
   if (p.image) { img.style.display = ""; img.src = p.image; img.alt = p.name; }
   else { img.removeAttribute("src"); img.style.display = "none"; }
   const buy = $("#sheetBuy");
@@ -518,6 +540,16 @@ $("#sheetBuy").onclick = e => {
   if (mode === "buy") { closeSheet(); addToCart(id); return; }
   const p = all.find(x => x.id === id);
   if (p) window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(waText(p)), "_blank", "noopener");
+};
+$("#sheetFinance").onclick = e => {
+  const p = all.find(x => x.id === e.currentTarget.dataset.id);
+  if (!p) return;
+  const cuota = dailyInstallment(p);
+  const text = "Hola Murador Equipamientos, quisiera consultar otra financiación para " + p.code + " — " + p.name +
+    (Number(p.price) > 0 ? "\nPrecio publicado: " + money(p.price) : "") +
+    (cuota ? "\nVi el Plan " + PLAN_DIAS + ": " + PLAN_DIAS + " cuotas diarias de " + money(cuota) : "") +
+    customerBlock();
+  window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(text), "_blank", "noopener");
 };
 $("#products").addEventListener("click", e => {
   const b = e.target.closest("[data-sheet]");
