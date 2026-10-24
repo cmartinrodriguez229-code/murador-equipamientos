@@ -93,6 +93,7 @@ function render() {
     (!$("#brandFilter").value || p.brand === $("#brandFilter").value)
   );
 
+  $("#clearFilters").disabled = !(q || $("#lineFilter").value || $("#categoryFilter").value || $("#brandFilter").value);
   $("#resultCount").textContent = `${list.length} artículos`;
   $("#empty").hidden = !!list.length;
 
@@ -131,6 +132,7 @@ function render() {
 
       <div class="actions">
         <button class="consult" data-wa="${esc(p.id)}">CONSULTAR PRECIO</button>
+        <button class="btn-sheet" type="button" data-sheet="${esc(p.id)}">VER FICHA</button>
       </div>
 
     </article>
@@ -143,9 +145,9 @@ function render() {
     price.className = "published-price";
     price.textContent = money(p.price);
     const add = document.createElement("button");
-    add.className = "consult add-cart";
+    add.className = "consult add-cart btn-buy";
     add.dataset.add = p.id;
-    add.textContent = "AGREGAR AL CARRITO";
+    add.textContent = "COMPRAR";
     b.replaceWith(price, add);
   });
 
@@ -477,8 +479,50 @@ function openLightbox(src, alt) {
 function closeLightbox() {
   $("#lightbox").hidden = true;
   $("#lbImg").removeAttribute("src");
+  if ($("#sheetModal").hidden) document.body.classList.remove("modal-open");
+}
+
+/* ---------- FICHA (popup VER FICHA) ---------- */
+function openSheet(id) {
+  const p = all.find(x => x.id === id);
+  if (!p) return;
+  const priced = p.pricePublished === true && Number(p.price) > 0;
+  const img = $("#sheetImg");
+  $("#sheetCode").textContent = p.code;
+  $("#sheetTitle").textContent = p.name;
+  $("#sheetMeta").textContent = [p.brand, p.category].filter(Boolean).join(" · ");
+  $("#sheetDesc").textContent = p.description || "Consultanos por especificaciones, precio y disponibilidad.";
+  $("#sheetPrice").textContent = priced ? money(p.price) : "";
+  $("#sheetPrice").hidden = !priced;
+  if (p.image) { img.style.display = ""; img.src = p.image; img.alt = p.name; }
+  else { img.removeAttribute("src"); img.style.display = "none"; }
+  const buy = $("#sheetBuy");
+  buy.textContent = priced ? "COMPRAR" : "CONSULTAR PRECIO";
+  buy.dataset.id = p.id;
+  buy.dataset.mode = priced ? "buy" : "wa";
+  $("#sheetModal").hidden = false;
+  document.body.classList.add("modal-open");
+  $("#sheetModal .sheet-box").scrollTop = 0;
+  $("#sheetClose").focus();
+}
+function closeSheet() {
+  $("#sheetModal").hidden = true;
   document.body.classList.remove("modal-open");
 }
+$("#sheetImg").onerror = function () { this.style.display = "none"; };
+$("#sheetImg").addEventListener("click", e => { if (e.target.getAttribute("src")) openLightbox(e.target.currentSrc || e.target.src, e.target.alt); });
+$("#sheetClose").onclick = closeSheet;
+$("#sheetModal").onclick = e => { if (e.target.id === "sheetModal") closeSheet(); };
+$("#sheetBuy").onclick = e => {
+  const { id, mode } = e.currentTarget.dataset;
+  if (mode === "buy") { closeSheet(); addToCart(id); return; }
+  const p = all.find(x => x.id === id);
+  if (p) window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(waText(p)), "_blank", "noopener");
+};
+$("#products").addEventListener("click", e => {
+  const b = e.target.closest("[data-sheet]");
+  if (b) openSheet(b.dataset.sheet);
+});
 
 $("#products").addEventListener("click", e => {
   const img = e.target.closest("img.zoomable");
@@ -496,12 +540,21 @@ $("#lightbox").onclick = e => { if (e.target.id === "lightbox") closeLightbox();
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if (!$("#lightbox").hidden) closeLightbox();
+  else if (!$("#sheetModal").hidden) closeSheet();
   else if (!$("#favPanel").hidden) closeFavs();
   else if (!$("#cartPanel").hidden) closeCart();
 });
 
 ["#search", "#lineFilter", "#categoryFilter", "#brandFilter"].forEach(s => {
   $(s).addEventListener(s === "#search" ? "input" : "change", () => { page = 1; render(); });
+});
+
+/* limpiar filtros */
+$("#clearFilters").addEventListener("click", () => {
+  $("#search").value = "";
+  ["#lineFilter", "#categoryFilter", "#brandFilter"].forEach(s => { $(s).value = ""; });
+  page = 1;
+  render();
 });
 
 /* volver arriba */

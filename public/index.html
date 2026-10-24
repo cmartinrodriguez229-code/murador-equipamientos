@@ -90,6 +90,7 @@
             <select id="lineFilter"><option value="">Líneas</option></select>
             <select id="categoryFilter"><option value="">Categorías</option></select>
             <select id="brandFilter"><option value="">Marcas</option></select>
+            <button id="clearFilters" class="clear-filters" type="button" disabled>Limpiar filtros</button>
         </div>
         <div id="products" class="products"></div>
         <nav id="pager" class="pager" aria-label="Paginación" hidden></nav>
@@ -178,6 +179,21 @@
         <div class="favfoot cart-actions">
           <button id="checkoutBtn" class="btn dark favconsult" type="button">PAGAR CON MERCADO PAGO</button>
           <button id="installmentsBtn" class="btn favconsult" type="button">SOLICITAR CUOTAS PERSONALIZADAS</button>
+        </div>
+    </div>
+</div>
+
+<div id="sheetModal" class="sheet-modal" hidden>
+    <div class="sheet-box" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+        <button id="sheetClose" class="sheet-close" type="button" aria-label="Cerrar">×</button>
+        <div class="sheet-photo"><img id="sheetImg" alt=""></div>
+        <div class="sheet-info">
+            <p id="sheetCode" class="code"></p>
+            <h3 id="sheetTitle"></h3>
+            <p id="sheetMeta" class="meta"></p>
+            <p id="sheetDesc" class="sheet-desc"></p>
+            <div id="sheetPrice" class="sheet-price" hidden></div>
+            <button id="sheetBuy" class="sheet-buy" type="button">COMPRAR</button>
         </div>
     </div>
 </div>
