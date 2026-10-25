@@ -158,7 +158,12 @@ function render() {
     if (!p || p.pricePublished !== true || !(Number(p.price) > 0)) return;
     const price = document.createElement("div");
     price.className = "published-price";
-    price.textContent = money(p.price);
+    const cuota = dailyInstallment(p);
+    if (cuota) {
+      // Inelro: no se publica el valor total, solo la cuota diaria del Plan 210
+      price.classList.add("plan-price");
+      price.innerHTML = '<span class="plan-badge">PLAN ' + PLAN_DIAS + ' · CUOTAS DIARIAS</span><span class="plan-amount">' + esc(money(cuota)) + ' <small>por día</small></span>';
+    } else price.textContent = money(p.price);
     const add = document.createElement("button");
     add.className = "consult add-cart btn-buy";
     add.dataset.add = p.id;
@@ -507,14 +512,15 @@ function openSheet(id) {
   $("#sheetTitle").textContent = p.name;
   $("#sheetMeta").textContent = [p.brand, p.category].filter(Boolean).join(" · ");
   $("#sheetDesc").textContent = p.description || "Consultanos por especificaciones, precio y disponibilidad.";
-  $("#sheetPrice").textContent = priced ? money(p.price) : "";
-  $("#sheetPriceBox").hidden = !priced;
   const cuota = priced ? dailyInstallment(p) : 0;
+  // Inelro: se muestra solo la cuota diaria (sin valor total); resto de marcas: precio como siempre
+  if (cuota) $("#sheetPrice").innerHTML = esc(money(cuota)) + ' <small>por día</small>';
+  else $("#sheetPrice").textContent = priced ? money(p.price) : "";
+  $("#sheetPriceBox").hidden = !priced;
   $("#sheetPlanBadge").hidden = !cuota;
-  $("#sheetInstallment").hidden = !cuota;
-  $("#sheetInstallment").innerHTML = cuota ? PLAN_DIAS + " cuotas diarias de <strong>" + esc(money(cuota)) + "</strong>" : "";
   const fin = $("#sheetFinance");
   fin.hidden = !cuota;
+  $("#sheetFinanceNote").hidden = !cuota;
   fin.dataset.id = p.id;
   if (p.image) { img.style.display = ""; img.src = p.image; img.alt = p.name; }
   else { img.removeAttribute("src"); img.style.display = "none"; }
@@ -546,7 +552,6 @@ $("#sheetFinance").onclick = e => {
   if (!p) return;
   const cuota = dailyInstallment(p);
   const text = "Hola Murador Equipamientos, quisiera consultar otra financiación para " + p.code + " — " + p.name +
-    (Number(p.price) > 0 ? "\nPrecio publicado: " + money(p.price) : "") +
     (cuota ? "\nVi el Plan " + PLAN_DIAS + ": " + PLAN_DIAS + " cuotas diarias de " + money(cuota) : "") +
     customerBlock();
   window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(text), "_blank", "noopener");
