@@ -295,6 +295,7 @@ $("#productForm").addEventListener("submit", (e) => {
   if (products.some((p) => p !== editing && p.code.toLowerCase() === code.toLowerCase())) return err(`Ya existe un artículo con el código ${code}.`);
 
   const p = editing || { id: uniqueId(code), featured: false };
+  const prevPrice = p.price;
   Object.assign(p, {
     line, category, code, name,
     brand: $("#fBrand").value.trim(),
@@ -303,6 +304,8 @@ $("#productForm").addEventListener("submit", (e) => {
     pricePublished: $("#fPriceYes").checked && Number($("#fPrice").value) > 0,
     visible: $("#fVisibleChk").checked
   });
+  // si se cambia el precio a mano, la cuota diaria de la planilla deja de valer (el sitio la recalcula)
+  if (editing && prevPrice !== p.price) p.installment = null;
   if (form.file) { p._file = form.file; p._preview = form.preview; p._clear = false; }
   else if (form.clear) { p.image = ""; p._file = null; p._preview = ""; p._clear = true; }
   if (!editing) products.unshift(p);
@@ -441,6 +444,7 @@ function sheetColumns(rows) {
         category: find("categoria"),
         brand: find("marca"),
         description: find("descripcion"),
+        installment: find("redondeodecuota", "redondeodecuotaars", "cuotadiaria", "cuota"),
         publishedPrice, referencePrice
       };
     }
@@ -487,7 +491,8 @@ async function importPriceWorkbook(file) {
         category: sheetCell(row, columns.category),
         brand: sheetCell(row, columns.brand),
         description: sheetCell(row, columns.description),
-        price: primary !== null ? primary : reference
+        price: primary !== null ? primary : reference,
+        installment: columns.installment >= 0 ? parseImportPrice(row[columns.installment]) : null
       });
     }
     if (!incoming.length) throw new Error("La hoja no contiene artículos para importar.");
@@ -506,6 +511,7 @@ async function importPriceWorkbook(file) {
         if (item.brand) product.brand = item.brand;
         if (item.description) product.description = item.description;
         if (item.price !== null) product.price = item.price;
+        if (item.installment !== null) product.installment = item.installment;
         updated++;
       } else {
         let id = slug(item.code), suffix = 2;
@@ -513,7 +519,9 @@ async function importPriceWorkbook(file) {
         product = {
           id, code: item.code, name: item.name, line: item.line,
           category: item.category, brand: item.brand, description: item.description,
-          image: "", visible: true, featured: false, price: item.price, pricePublished: false
+          // la foto se busca primero en el panel y, si no hay, en la carpeta /fotos/<id>.webp del sitio
+          image: "/api/image/" + encodeURIComponent(id), visible: true, featured: false, price: item.price,
+          installment: item.installment, pricePublished: false
         };
         next.push(product);
         ids.add(id);

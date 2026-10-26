@@ -24,9 +24,10 @@ const wa = "5493434627755";
 const PLAN_DIAS = 210;
 // Cuota diaria redondeada hacia arriba. Usa la columna "Redondeo de cuota (ARS)" de la planilla
 // si el admin la envía; si no, para Inelro la calcula como precio / 210 (misma fórmula de la lista).
-// Por ahora SOLO aplica a la lista Inelro; el resto de las marcas queda como estaba.
+// Aplica a las marcas con Plan 210 (Inelro y Sol Real); el resto de las marcas queda como estaba.
+const PLAN_BRANDS = ["inelro", "sol real"];
 function dailyInstallment(p) {
-  if (String(p.brand || "").toLowerCase() !== "inelro") return 0;
+  if (!PLAN_BRANDS.includes(String(p.brand || "").trim().toLowerCase())) return 0;
   for (const k of ["installment", "dailyInstallment", "cuotaDiaria", "cuota", "redondeoCuota"]) {
     const v = Number(p[k]);
     if (v > 0) return Math.round(v);
@@ -160,7 +161,7 @@ function render() {
     price.className = "published-price";
     const cuota = dailyInstallment(p);
     if (cuota) {
-      // Inelro: no se publica el valor total, solo la cuota diaria del Plan 210
+      // Marcas con Plan 210 (Inelro, Sol Real): no se publica el valor total, solo la cuota diaria
       price.classList.add("plan-price");
       price.innerHTML = '<span class="plan-badge">PLAN ' + PLAN_DIAS + ' · CUOTAS DIARIAS</span><span class="plan-amount">' + esc(money(cuota)) + ' <small>por día</small></span>';
     } else price.textContent = money(p.price);
@@ -513,7 +514,7 @@ function openSheet(id) {
   $("#sheetMeta").textContent = [p.brand, p.category].filter(Boolean).join(" · ");
   $("#sheetDesc").textContent = p.description || "Consultanos por especificaciones, precio y disponibilidad.";
   const cuota = priced ? dailyInstallment(p) : 0;
-  // Inelro: se muestra solo la cuota diaria (sin valor total); resto de marcas: precio como siempre
+  // Marcas con Plan 210 (Inelro, Sol Real): se muestra solo la cuota diaria (sin valor total); resto de marcas: precio como siempre
   if (cuota) $("#sheetPrice").innerHTML = esc(money(cuota)) + ' <small>por día</small>';
   else $("#sheetPrice").textContent = priced ? money(p.price) : "";
   $("#sheetPriceBox").hidden = !priced;
