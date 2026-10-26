@@ -142,6 +142,8 @@ function cleanProduct(p) {
   if (!name) throw new HttpError(400, `El artículo ${code} necesita un nombre.`);
   if (!line) throw new HttpError(400, `El artículo ${code} necesita una sección.`);
   if (p.price !== null && p.price !== "" && p.price !== undefined && (!Number.isFinite(Number(p.price)) || Number(p.price) < 0 || Number(p.price) > 100000000000)) throw new HttpError(400, `Precio inválido para ${code}.`);
+  const hasInst = p.installment !== null && p.installment !== "" && p.installment !== undefined;
+  if (hasInst && (!Number.isFinite(Number(p.installment)) || Number(p.installment) < 0 || Number(p.installment) > 1000000000)) throw new HttpError(400, `Cuota diaria inválida para ${code}.`);
   return {
     id: safeId(txt(p.id, 120) || code.toLowerCase()),
     code, name, line,
@@ -152,6 +154,8 @@ function cleanProduct(p) {
     visible: p.visible !== false,
     featured: p.featured === true,
     price: p.price === null || p.price === "" || p.price === undefined ? null : Math.round(Number(p.price)),
+    // cuota diaria del Plan 210 tomada de la planilla ("Redondeo de cuota"); si falta, el sitio la calcula como precio / 210
+    installment: hasInst && Number(p.installment) > 0 ? Math.round(Number(p.installment)) : null,
     pricePublished: p.pricePublished === true
   };
 }
@@ -226,7 +230,7 @@ async function handle(req, env, ctx) {
     if (method === "GET" && path === "catalog") {
       const [products, settings] = await Promise.all([getProducts(env, req, { persistSeed: false }), getSettings(env, req)]);
       const visible = products.filter((p) => p.visible !== false);
-      const publicProducts = visible.map((p) => p.pricePublished === true ? p : { ...p, price: null });
+      const publicProducts = visible.map((p) => p.pricePublished === true ? p : { ...p, price: null, installment: null });
       return json({ products: publicProducts, settings, taxonomy: await getTaxonomy(env, visible) }, 200, { "cache-control": "no-store" });
     }
     if (path === "customer" && (method === "GET" || method === "PUT")) {
