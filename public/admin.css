@@ -70,12 +70,12 @@ textarea{resize:vertical;min-height:84px}
 .panel-head p{margin:6px 0 0}
 
 /* filtros */
-.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 .filters input,.filters select{margin:0}
 
 /* tabla */
 .table{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.row{display:grid;grid-template-columns:78px 64px minmax(0,2fr) minmax(0,1.4fr) minmax(0,1fr) minmax(145px,1.2fr) 170px;gap:14px;align-items:center;padding:10px 14px;border-bottom:1px solid #eee}
+.row{display:grid;grid-template-columns:34px 78px 64px minmax(0,2fr) minmax(0,1.4fr) minmax(0,1fr) minmax(145px,1.2fr) 170px;gap:14px;align-items:center;padding:10px 14px;border-bottom:1px solid #eee}
 .row.head{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:#faf9f5}
 .row:last-child{border-bottom:0}
 .row.hidden-item{background:#faf9f5}
@@ -129,9 +129,9 @@ dialog form{padding:22px}
 @media(max-width:900px){
   .filters{grid-template-columns:1fr 1fr}
   .filters input{grid-column:1/-1}
-  .row{grid-template-columns:70px 56px minmax(0,1.6fr) minmax(0,1fr) minmax(135px,1.1fr) 150px}
+  .row{grid-template-columns:34px 70px 56px minmax(0,1.6fr) minmax(0,1fr) minmax(135px,1.1fr) 150px}
   .row .brandcell{display:none}
-  .row.head span:nth-child(5){display:none}
+  .row.head span:nth-child(6){display:none}
 }
 @media(max-width:760px){
   .formlayout{grid-template-columns:1fr}
@@ -150,7 +150,9 @@ dialog form{padding:22px}
 
   /* filas como tarjetas */
   .row.head{display:none}
-  .row{grid-template-columns:64px minmax(0,1fr);grid-template-areas:"img name" "img sec" "img brand" "img price" "vis acts";gap:2px 12px;padding:12px}
+  .row{grid-template-columns:64px minmax(0,1fr);grid-template-areas:"sel sel" "img name" "img sec" "img brand" "img price" "vis acts";gap:2px 12px;padding:12px}
+  .row .selcell{grid-area:sel;margin-bottom:6px}
+  .row .selcell span{display:inline}
   .row .thumb{grid-area:img;width:64px;height:64px}
   .row .name{grid-area:name}
   .row .sec{grid-area:sec}
@@ -173,3 +175,36 @@ dialog form{padding:22px}
 
 .price-controls{display:grid;grid-template-columns:minmax(160px,1fr) minmax(230px,1.2fr);gap:12px;align-items:start;margin-top:8px}.price-controls input[type=number]{display:block;width:100%;margin-top:6px;padding:11px 12px;border:1px solid #cfcabb;background:#fff;border-radius:8px;font-size:16px}.publish-choice{border:1px solid var(--line);border-radius:8px;padding:8px 12px 2px;margin:0}.publish-choice legend{font-size:13px;font-weight:700;padding:0 4px}.publish-choice label{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;margin:4px 0 8px}.publish-choice input{accent-color:var(--purple)}.price-note{display:block;margin:-4px 0 14px;color:var(--muted);font-size:12px}
 @media(max-width:700px){.price-controls{grid-template-columns:1fr}}
+
+/* ---------- secciones PRECIOS y PLANILLA ---------- */
+.boxes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.6fr);gap:14px;margin-bottom:16px}
+.box{background:var(--card);border:1px solid var(--ink);border-left:10px solid var(--yellow);padding:16px 18px}
+.box h3{font-size:18px;margin:0 0 6px}
+.box h4{font-family:"Bjorn","Segoe UI",sans-serif;text-transform:uppercase;font-size:15px;margin:0 0 4px}
+.box p{margin:0 0 10px;font-size:13px}
+.box .box-note{margin:10px 0 0;font-weight:600}
+.box-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sheet-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:20px}
+.sheet-col+.sheet-col{border-left:1px solid var(--line);padding-left:20px}
+.export-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-bottom:10px}
+.export-filters select{margin:0;padding:9px 6px;font-size:13px;text-overflow:ellipsis}
+#exportInfo{font-size:13px;font-weight:600}
+
+/* listado: seleccionar todo */
+.listbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 8px;padding:8px 14px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.selall{display:flex;align-items:center;gap:10px;margin:0;font-weight:800;letter-spacing:.04em;font-size:13px;cursor:pointer}
+.selall input,.row .selcell input{width:20px;height:20px;margin:0;accent-color:var(--purple);cursor:pointer}
+.row .selcell{display:flex;align-items:center;margin:0;cursor:pointer}
+.row .selcell span{display:none;font-size:12px;font-weight:700;margin-left:8px}
+.listbar #listInfo{font-size:13px;font-weight:600}
+.listbar .btn{margin-left:auto}
+@media(max-width:1000px){
+  .boxes,.sheet-cols{grid-template-columns:1fr}
+  .sheet-col+.sheet-col{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:14px}
+}
+@media(max-width:700px){
+  .export-filters{grid-template-columns:1fr}
+  .box-actions .btn{flex:1}
+  .panel-head .product-tools{display:block}
+}
+.filters select{font-size:14px;padding-left:10px;padding-right:6px}

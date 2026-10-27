@@ -567,3 +567,12 @@ body.modal-open{overflow:hidden}
   .plan-price .plan-badge{font-size:9.5px;padding:5px 7px;letter-spacing:.03em}
   .plan-price .plan-amount{font-size:17px}
 }
+
+
+/* ===== 12. PRECIOS DE LA FICHA Y DEL CARRITO EN MONTSERRAT ===== */
+.sheet-price,.sheet-price small,
+#sheetPriceBox .plan-amount,
+.cart-subtotal strong,#cartSubtotal,
+.cartinfo small{font-family:"Montserrat","Segoe UI",Arial,sans-serif}
+.sheet-price,.cart-subtotal strong{font-weight:800;font-variant-numeric:lining-nums}
+.cartinfo small{font-weight:700}

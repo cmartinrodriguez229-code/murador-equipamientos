@@ -11,6 +11,8 @@ let taxonomy = { sections: [] };
 let dirty = false;
 let editing = null;            // artículo que se está editando (null = nuevo)
 let form = { file: null, preview: "", clear: false };
+const selected = new Set();    // ids de los artículos tildados en el listado
+const NO_BRAND = "__sin_marca";
 
 /* ---------- API ---------- */
 async function api(path, { method = "GET", body, raw, type } = {}) {
@@ -81,7 +83,7 @@ document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () 
 /* ---------- utilidades ---------- */
 const sectionNames = () => taxonomy.sections.map((s) => s.name);
 const sectionByName = (n) => taxonomy.sections.find((s) => s.name === n);
-const countIn = (line, cat) => products.filter((p) => p.line === line && (cat === undefined || p.category === cat)).length;
+const countIn = (line, cat, onlyVisible = false) => products.filter((p) => p.line === line && (cat === undefined || p.category === cat) && (!onlyVisible || p.visible !== false)).length;
 const imgOf = (p) => p._preview || p.image || "";
 function slug(code) { return String(code).trim().toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 100) || "item"; }
 function uniqueId(code, ignore) {
@@ -97,28 +99,41 @@ function optionList(values, selected, placeholder) {
 /* ---------- render general ---------- */
 function renderAll() { renderFilters(); renderRows(); renderTaxonomy(); }
 
+const brandNames = () => [...new Set(products.map((p) => String(p.brand || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+const hasNoBrand = () => products.some((p) => !String(p.brand || "").trim());
+function brandOptions(selectedValue, placeholder) {
+  return optionList(brandNames(), selectedValue, placeholder) +
+    (hasNoBrand() ? `<option value="${NO_BRAND}"${selectedValue === NO_BRAND ? " selected" : ""}>(Sin marca)</option>` : "");
+}
+const matchBrand = (p, b) => !b || (b === NO_BRAND ? !String(p.brand || "").trim() : String(p.brand || "").trim() === b);
+const categoriesFor = (sec) => sec ? (sectionByName(sec)?.categories || []) : [...new Set(taxonomy.sections.flatMap((s) => s.categories))];
+
 function renderFilters() {
-  const sec = $("#fSection").value, cat = $("#fCategory").value;
+  const sec = $("#fSection").value, cat = $("#fCategory").value, brand = $("#fBrandFilter").value;
   $("#fSection").innerHTML = optionList(sectionNames(), sec, "Todas las secciones");
   if (!sectionNames().includes(sec)) $("#fSection").value = "";
-  const cats = $("#fSection").value ? (sectionByName($("#fSection").value)?.categories || []) : [...new Set(taxonomy.sections.flatMap((s) => s.categories))];
+  const cats = categoriesFor($("#fSection").value);
   $("#fCategory").innerHTML = optionList(cats, cat, "Todas las categorías");
   if (!cats.includes(cat)) $("#fCategory").value = "";
+  $("#fBrandFilter").innerHTML = brandOptions(brand, "Todas las marcas");
+  if (brand && ![...brandNames(), NO_BRAND].includes(brand)) $("#fBrandFilter").value = "";
+  renderExportFilters();
 }
-["#q", "#fCategory", "#fVisible"].forEach((s) => $(s).addEventListener("input", renderRows));
+["#q", "#fCategory", "#fBrandFilter", "#fVisible"].forEach((s) => $(s).addEventListener("input", renderRows));
 $("#fSection").addEventListener("change", () => { $("#fCategory").value = ""; renderFilters(); renderRows(); });
 
 function filtered() {
   const q = $("#q").value.trim().toLowerCase();
-  const sec = $("#fSection").value, cat = $("#fCategory").value, vis = $("#fVisible").value;
+  const sec = $("#fSection").value, cat = $("#fCategory").value, vis = $("#fVisible").value, brand = $("#fBrandFilter").value;
   return products.filter((p) =>
     (!q || [p.code, p.name, p.brand, p.description].join(" ").toLowerCase().includes(q)) &&
-    (!sec || p.line === sec) && (!cat || p.category === cat) &&
+    (!sec || p.line === sec) && (!cat || p.category === cat) && matchBrand(p, brand) &&
     (!vis || (vis === "1") === (p.visible !== false)));
 }
 
 function renderRows() {
   const list = filtered();
+  for (const id of [...selected]) if (!products.some((p) => p.id === id)) selected.delete(id);
   const vis = products.filter((p) => p.visible !== false).length;
   $("#counts").textContent = `${products.length} artículos · ${vis} visibles · ${products.length - vis} ocultos`;
   $("#empty").hidden = list.length > 0;
@@ -127,6 +142,10 @@ function renderRows() {
     const on = p.visible !== false;
     const img = imgOf(p);
     return `<div class="row${on ? "" : " hidden-item"}" role="row" data-id="${esc(p.id)}">
+      <label class="selcell" title="Seleccionar para publicar o despublicar precios">
+        <input type="checkbox" data-sel ${selected.has(p.id) ? "checked" : ""} aria-label="Seleccionar ${esc(p.code)}">
+        <span>Seleccionar</span>
+      </label>
       <label class="vis" title="Mostrar u ocultar en el sitio">
         <input type="checkbox" data-vis ${on ? "checked" : ""} aria-label="Mostrar ${esc(p.code)}">
         <span>${on ? "Visible" : "Oculto"}</span>
@@ -142,7 +161,58 @@ function renderRows() {
       </div>
     </div>`;
   }).join("");
+  updateSelectionUI(list);
 }
+
+/* ---------- selección y precios ---------- */
+function updateSelectionUI(list = filtered()) {
+  const inList = list.filter((p) => selected.has(p.id)).length;
+  const all = $("#selectAll");
+  all.checked = list.length > 0 && inList === list.length;
+  all.indeterminate = inList > 0 && inList < list.length;
+  all.disabled = list.length === 0;
+  const n = selected.size;
+  $("#listInfo").textContent = n
+    ? `${n} seleccionado${n === 1 ? "" : "s"}` + (n !== inList ? ` (${inList} en este listado)` : "") + ` · ${list.length} en el listado`
+    : `${list.length} en el listado`;
+  $("#clearSel").hidden = n === 0;
+  $("#publishSelected").disabled = n === 0;
+  $("#unpublishSelected").disabled = n === 0;
+  $("#priceSelInfo").textContent = n ? `${n} artículo${n === 1 ? "" : "s"} seleccionado${n === 1 ? "" : "s"}.` : "Ningún artículo seleccionado.";
+}
+$("#selectAll").addEventListener("change", (e) => {
+  const list = filtered();
+  list.forEach((p) => (e.target.checked ? selected.add(p.id) : selected.delete(p.id)));
+  document.querySelectorAll("#rows [data-sel]").forEach((c) => { c.checked = e.target.checked; });
+  updateSelectionUI(list);
+});
+$("#clearSel").addEventListener("click", () => {
+  selected.clear();
+  document.querySelectorAll("#rows [data-sel]").forEach((c) => { c.checked = false; });
+  updateSelectionUI();
+});
+function setPriceState(publish) {
+  const items = products.filter((p) => selected.has(p.id));
+  if (!items.length) return;
+  let changed = 0, noPrice = 0;
+  for (const p of items) {
+    if (publish) {
+      if (!(Number(p.price) > 0)) { noPrice++; continue; }
+      if (p.pricePublished !== true) changed++;
+      p.pricePublished = true;
+    } else {
+      if (p.pricePublished === true) changed++;
+      p.pricePublished = false;
+    }
+  }
+  renderRows(); setDirty(true);
+  $("#status").textContent = publish
+    ? `Precios publicados: ${changed} de ${items.length} seleccionados` + (noPrice ? ` (${noPrice} sin precio, no se publicaron)` : "") + ". Guardá los cambios."
+    : `Precios despublicados: ${changed} de ${items.length} seleccionados. Guardá los cambios.`;
+}
+$("#publishSelected").addEventListener("click", () => setPriceState(true));
+$("#unpublishSelected").addEventListener("click", () => setPriceState(false));
+
 $("#rows").addEventListener("click", (e) => {
   const row = e.target.closest(".row"); if (!row) return;
   const p = products.find((x) => x.id === row.dataset.id); if (!p) return;
@@ -150,6 +220,12 @@ $("#rows").addEventListener("click", (e) => {
   else if (e.target.closest("[data-del]")) deleteProduct(p);
 });
 $("#rows").addEventListener("change", (e) => {
+  if (e.target.matches("[data-sel]")) {
+    const id = e.target.closest(".row").dataset.id;
+    if (e.target.checked) selected.add(id); else selected.delete(id);
+    updateSelectionUI();
+    return;
+  }
   if (e.target.matches("[data-price-published]")) {
     const row = e.target.closest(".row");
     const p = products.find((x) => x.id === row.dataset.id); if (!p) return;
@@ -169,21 +245,10 @@ $("#rows").addEventListener("change", (e) => {
   setDirty(true);
 });
 
-$("#publishAllPrices").addEventListener("click", () => {
-  let count = 0;
-  products.forEach(p => { if (Number(p.price) > 0) { p.pricePublished = true; count++; } });
-  renderRows(); setDirty(true);
-  $("#status").textContent = count + " precios listos para publicar. Guardá los cambios.";
-});
-$("#unpublishAllPrices").addEventListener("click", () => {
-  products.forEach(p => { p.pricePublished = false; });
-  renderRows(); setDirty(true);
-  $("#status").textContent = "Todos los precios quedaron despublicados. Guardá los cambios.";
-});
-
 function deleteProduct(p) {
   if (!confirm(`¿Eliminar "${p.name}" (${p.code})? Se borra definitivamente al guardar.`)) return;
   products = products.filter((x) => x !== p);
+  selected.delete(p.id);
   setDirty(true);
   renderRows();
   renderTaxonomy();
@@ -329,7 +394,7 @@ function renderTaxonomy() {
     <div class="seccard" data-i="${i}">
       <div class="sechead">
         <input data-secname value="${esc(s.name)}" maxlength="80" aria-label="Nombre de la sección">
-        <span class="count">${countIn(s.name)} artículos</span>
+        <span class="count">${countIn(s.name)} artículos · ${countIn(s.name, undefined, true)} visibles en el sitio</span>
         <div class="secbtns">
           <button class="btn sm" data-up type="button" ${i === 0 ? "disabled" : ""} aria-label="Subir">↑</button>
           <button class="btn sm" data-down type="button" ${i === taxonomy.sections.length - 1 ? "disabled" : ""} aria-label="Bajar">↓</button>
@@ -408,6 +473,84 @@ $("#addSection").addEventListener("submit", (e) => {
   taxonomy.sections.push({ name, categories: [] });
   $("#newSectionName").value = "";
   setDirty(true); renderAll();
+});
+
+/* ---------- exportar planilla ---------- */
+function renderExportFilters() {
+  const brand = $("#xBrand").value, sec = $("#xSection").value, cat = $("#xCategory").value;
+  $("#xBrand").innerHTML = brandOptions(brand, "Marca (todas)");
+  if (brand && ![...brandNames(), NO_BRAND].includes(brand)) $("#xBrand").value = "";
+  $("#xSection").innerHTML = optionList(sectionNames(), sec, "Sección (todas)");
+  if (!sectionNames().includes(sec)) $("#xSection").value = "";
+  const cats = categoriesFor($("#xSection").value);
+  $("#xCategory").innerHTML = optionList(cats, cat, "Categoría (todas)");
+  if (!cats.includes(cat)) $("#xCategory").value = "";
+  updateExportInfo();
+}
+function exportList() {
+  const brand = $("#xBrand").value, sec = $("#xSection").value, cat = $("#xCategory").value;
+  return products.filter((p) => matchBrand(p, brand) && (!sec || p.line === sec) && (!cat || p.category === cat));
+}
+function updateExportInfo() {
+  const n = exportList().length;
+  $("#exportInfo").textContent = `${n} artículo${n === 1 ? "" : "s"}`;
+  $("#exportSheet").disabled = n === 0;
+}
+["#xBrand", "#xCategory"].forEach((s) => $(s).addEventListener("change", updateExportInfo));
+$("#xSection").addEventListener("change", () => { $("#xCategory").value = ""; renderExportFilters(); });
+
+// Las columnas "Código … Redondeo de cuota" son las mismas que lee la importación,
+// así la planilla exportada se puede editar y volver a subir.
+const EXPORT_COLUMNS = [
+  ["Código", (p) => p.code],
+  ["Sección", (p) => p.line],
+  ["Categoría", (p) => p.category || ""],
+  ["Marca", (p) => p.brand || ""],
+  ["Nombre", (p) => p.name],
+  ["Descripción", (p) => p.description || ""],
+  ["Precio publicado", (p) => (Number(p.price) > 0 ? Number(p.price) : "")],
+  ["Redondeo de cuota", (p) => (Number(p.installment) > 0 ? Number(p.installment) : "")],
+  ["Precio en el sitio", (p) => (p.pricePublished === true && Number(p.price) > 0 ? "Publicado" : "No publicado")],
+  ["Visible en el sitio", (p) => (p.visible !== false ? "Sí" : "No")],
+  ["Destacado", (p) => (p.featured === true ? "Sí" : "No")],
+  ["Imagen", (p) => String(p.image || "").replace(/\?v=\d+$/, "")],
+  ["ID", (p) => p.id]
+];
+const EXPORT_WIDTHS = [12, 24, 26, 18, 38, 60, 16, 16, 18, 16, 11, 34, 18];
+const fileSlug = (t) => String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase();
+
+$("#exportSheet").addEventListener("click", () => {
+  const status = $("#priceImportStatus");
+  try {
+    if (!window.XLSX) throw new Error("No se pudo cargar el generador de Excel. Revisá tu conexión e intentá de nuevo.");
+    const list = exportList();
+    if (!list.length) throw new Error("No hay artículos para exportar con ese filtro.");
+    const rows = [EXPORT_COLUMNS.map(([h]) => h), ...list.map((p) => EXPORT_COLUMNS.map(([, f]) => f(p)))];
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"] = EXPORT_WIDTHS.map((wch) => ({ wch }));
+    ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: rows.length - 1, c: EXPORT_COLUMNS.length - 1 } }) };
+    // formato de pesos en las columnas de precio y cuota
+    for (let r = 1; r < rows.length; r++) for (const c of [6, 7]) {
+      const cell = ws[XLSX.utils.encode_cell({ r, c })];
+      if (cell && cell.t === "n") cell.z = '"$" #,##0';
+    }
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Catálogo");
+    const parts = [];
+    if ($("#xBrand").value) parts.push($("#xBrand").value === NO_BRAND ? "sin-marca" : fileSlug($("#xBrand").value));
+    if ($("#xSection").value) parts.push(fileSlug($("#xSection").value));
+    if ($("#xCategory").value) parts.push(fileSlug($("#xCategory").value));
+    const d = new Date(), pad = (n) => String(n).padStart(2, "0");
+    const name = `Murador_precios_${parts.length ? parts.join("_") + "_" : ""}${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.xlsx`;
+    XLSX.writeFile(wb, name);
+    status.hidden = false;
+    status.className = "import-status success";
+    status.textContent = `Planilla exportada: ${list.length} artículo(s) en "${name}".` + (dirty ? " Incluye los cambios que todavía no guardaste." : "");
+  } catch (err) {
+    status.hidden = false;
+    status.className = "import-status error";
+    status.textContent = "No se exportó la planilla: " + err.message;
+  }
 });
 
 /* ---------- importar planilla de precios ---------- */
@@ -497,10 +640,23 @@ async function importPriceWorkbook(file) {
     }
     if (!incoming.length) throw new Error("La hoja no contiene artículos para importar.");
 
+    // Si la planilla trae una sección/categoría que ya existe con otras mayúsculas o espacios, se usa la existente
+    // (así no se crea una sección duplicada y los contadores del índice del sitio siguen correctos).
+    const sameName = (a, b) => String(a).trim().toLocaleLowerCase("es-AR") === String(b).trim().toLocaleLowerCase("es-AR");
+    for (const item of incoming) {
+      const sec = taxonomy.sections.find(x => sameName(x.name, item.line));
+      if (sec) {
+        item.line = sec.name;
+        const cat = item.category && sec.categories.find(c => sameName(c, item.category));
+        if (cat) item.category = cat;
+      }
+    }
+
     const next = products.map(p => ({ ...p }));
     const byCode = new Map(next.map(p => [p.code.toLocaleLowerCase("es-AR"), p]));
     const ids = new Set(next.map(p => p.id));
     let updated = 0, added = 0;
+    const addedCodes = [];
     for (const item of incoming) {
       let product = byCode.get(item.code.toLocaleLowerCase("es-AR"));
       if (product) {
@@ -527,6 +683,7 @@ async function importPriceWorkbook(file) {
         ids.add(id);
         byCode.set(item.code.toLocaleLowerCase("es-AR"), product);
         added++;
+        addedCodes.push(item.code);
       }
     }
 
@@ -554,7 +711,8 @@ async function importPriceWorkbook(file) {
       ? " Advertencia: " + missing.length + " artículo(s) visible(s) no incluido(s) en la planilla (se conservaron): " + missing.slice(0, 18).map(p => p.code + " — " + p.name).join("; ") + (missing.length > 18 ? "; y " + (missing.length - 18) + " más." : ".")
       : " No quedaron artículos visibles fuera de la planilla.";
     status.className = missing.length ? "import-status warning" : "import-status success";
-    status.textContent = "Importación completada: " + updated + " actualizado(s), " + added + " nuevo(s)." + warning;
+    const detail = added ? " Nuevos: " + addedCodes.slice(0, 18).join(", ") + (addedCodes.length > 18 ? " y " + (addedCodes.length - 18) + " más." : ".") : "";
+    status.textContent = "Importación completada: " + incoming.length + " fila(s) leída(s), " + updated + " actualizado(s), " + added + " nuevo(s)." + detail + warning;
   } catch (err) {
     status.className = "import-status error";
     status.textContent = "No se importó la planilla: " + err.message;

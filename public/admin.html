@@ -61,12 +61,47 @@
         <p id="counts" class="muted"></p>
       </div>
       <div class="product-tools">
-        <button class="btn" id="uploadPriceSheet" type="button">SUBIR PLANILLA DE PRECIOS ACTUALIZADOS</button>
-        <input id="priceSheetFile" type="file" accept=".xlsx,.xls,.csv" hidden>
-        <button class="btn" id="publishAllPrices" type="button">Publicar todos los precios</button>
-        <button class="btn" id="unpublishAllPrices" type="button">Despublicar todos los precios</button>
         <button class="btn dark" id="newProduct" type="button">+ Nuevo artículo</button>
       </div>
+    </div>
+
+    <div class="boxes">
+      <!-- PRECIOS -->
+      <section class="box" id="pricesBox" aria-labelledby="pricesTitle">
+        <h3 id="pricesTitle">Precios</h3>
+        <p class="muted">Publicá o despublicá en el sitio el precio de los artículos que tengas tildados en el listado.</p>
+        <div class="box-actions">
+          <button class="btn" id="publishSelected" type="button" disabled>Publicar</button>
+          <button class="btn" id="unpublishSelected" type="button" disabled>Despublicar</button>
+        </div>
+        <p id="priceSelInfo" class="muted box-note">Ningún artículo seleccionado.</p>
+      </section>
+
+      <!-- PLANILLA DE PRECIOS ACTUALIZADOS -->
+      <section class="box" id="sheetBox" aria-labelledby="sheetTitle">
+        <h3 id="sheetTitle">Planilla de precios actualizados</h3>
+        <div class="sheet-cols">
+          <div class="sheet-col">
+            <h4>Importar</h4>
+            <p class="muted">Sube un Excel o CSV. Actualiza los artículos que ya existen (por código) y agrega los nuevos.</p>
+            <button class="btn" id="uploadPriceSheet" type="button">Importar planilla</button>
+            <input id="priceSheetFile" type="file" accept=".xlsx,.xls,.csv" hidden>
+          </div>
+          <div class="sheet-col">
+            <h4>Exportar</h4>
+            <p class="muted">Descarga un Excel con todos los campos de la ficha. Podés limitarlo por marca, sección o categoría.</p>
+            <div class="export-filters">
+              <select id="xBrand" aria-label="Exportar por marca"><option value="">Marca (todas)</option></select>
+              <select id="xSection" aria-label="Exportar por sección"><option value="">Sección (todas)</option></select>
+              <select id="xCategory" aria-label="Exportar por categoría"><option value="">Categoría (todas)</option></select>
+            </div>
+            <div class="box-actions">
+              <button class="btn" id="exportSheet" type="button">Exportar planilla</button>
+              <span id="exportInfo" class="muted"></span>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
     <div id="priceImportStatus" class="import-status" role="status" aria-live="polite" hidden></div>
 
@@ -74,6 +109,7 @@
       <input id="q" type="search" placeholder="Buscar por código, nombre o marca…">
       <select id="fSection"><option value="">Todas las secciones</option></select>
       <select id="fCategory"><option value="">Todas las categorías</option></select>
+      <select id="fBrandFilter"><option value="">Todas las marcas</option></select>
       <select id="fVisible">
         <option value="">Visibles y ocultos</option>
         <option value="1">Solo visibles</option>
@@ -81,8 +117,15 @@
       </select>
     </div>
 
+    <div class="listbar">
+      <label class="selall"><input type="checkbox" id="selectAll"> <span>SELECCIONAR TODO</span></label>
+      <span id="listInfo" class="muted"></span>
+      <button class="btn sm" id="clearSel" type="button" hidden>Limpiar selección</button>
+    </div>
+
     <div class="table" id="table" role="table">
       <div class="row head" role="row">
+        <span role="columnheader">Sel.</span>
         <span role="columnheader">Mostrar</span>
         <span role="columnheader">Foto</span>
         <span role="columnheader">Artículo</span>

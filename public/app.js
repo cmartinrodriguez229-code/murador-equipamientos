@@ -65,9 +65,12 @@ async function load() {
 
 function renderLines() {
   const visible = all.filter(p => p.visible !== false);
+  const norm = v => String(v ?? "").trim().toLocaleLowerCase("es-AR");
+  // el contador sale siempre del catálogo cargado: se actualiza solo al agregar, ocultar o quitar artículos
+  const countOf = sec => visible.filter(p => norm(p.line) === norm(sec.name)).length;
   $("#lineButtons").innerHTML = sections.map(sec => `
     <button type="button" class="linebtn" data-line="${esc(sec.name)}">
-      <span class="linebtn-count">${visible.filter(p => p.line === sec.name).length} EQUIPOS</span>
+      <span class="linebtn-count">${countOf(sec)} ${countOf(sec) === 1 ? "EQUIPO" : "EQUIPOS"}</span>
       <span class="linebtn-title">${esc(sec.name)}</span>
       <span class="linebtn-desc">${esc((sec.categories || []).filter(c => c.toLowerCase() !== "por clasificar").join(" · "))}</span>
     </button>
