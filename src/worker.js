@@ -11,6 +11,7 @@ const SESSION_COOKIE = "murador_admin_session";
 const SESSION_HOURS = 12;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const enc = new TextEncoder();
+const PLANS = new Set(["210", "90", "120", "150", "180", "contado"]);
 
 const defaultSettings = {
   siteName: "MURADOR EQUIPAMIENTOS",
@@ -156,7 +157,9 @@ function cleanProduct(p) {
     price: p.price === null || p.price === "" || p.price === undefined ? null : Math.round(Number(p.price)),
     // cuota diaria del Plan 210 tomada de la planilla ("Redondeo de cuota"); si falta, el sitio la calcula como precio / 210
     installment: hasInst && Number(p.installment) > 0 ? Math.round(Number(p.installment)) : null,
-    pricePublished: p.pricePublished === true
+    pricePublished: p.pricePublished === true,
+    // plan de cuotas: "210", "90", "120", "150", "180" o "contado" (vacío = el que corresponda a la marca)
+    plan: PLANS.has(String(p.plan ?? "").trim().toLowerCase()) ? String(p.plan).trim().toLowerCase() : ""
   };
 }
 
