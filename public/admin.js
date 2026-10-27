@@ -80,6 +80,39 @@ document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () 
   $("#tab-taxonomy").hidden = t.dataset.tab !== "taxonomy";
 }));
 
+
+/* ---------- plan de cuotas (misma regla que el sitio, app.js) ---------- */
+const PLAN_DIAS = 210, PLAN_BRANDS = ["inelro", "sol real"];
+const PLAN_LABELS = { "210": "210 cuotas", "90": "90 cuotas", "120": "120 cuotas", "150": "150 cuotas", "180": "180 cuotas", contado: "Contado" };
+const money = (v) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(Number(v) || 0);
+// días del plan: el elegido en el artículo; sin plan, las marcas Inelro y Sol Real usan 210. 0 = sin cuotas diarias (contado o sin plan)
+function planDays(p) {
+  const plan = String(p.plan || "").trim().toLowerCase();
+  if (plan === "contado") return 0;
+  if (/^\d+$/.test(plan) && Number(plan) > 0) return Number(plan);
+  return PLAN_BRANDS.includes(String(p.brand || "").trim().toLowerCase()) ? PLAN_DIAS : 0;
+}
+function dailyInstallment(p) {
+  const days = planDays(p);
+  if (!days) return 0;
+  if (Number(p.installment) > 0) return Math.round(Number(p.installment));
+  if (Number(p.price) > 0) return Math.ceil(Number(p.price) / days - 1e-9);
+  return 0;
+}
+function planLabel(p) {
+  const plan = String(p.plan || "").trim().toLowerCase();
+  if (plan === "contado") return "Contado";
+  const d = planDays(p);
+  return d ? `Plan ${d}` : "";
+}
+function parsePlan(v) {
+  const t = String(v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  if (!t) return "";
+  if (t.includes("contado")) return "contado";
+  const m = t.match(/\d+/);
+  return m && ["90", "120", "150", "180", "210"].includes(m[0]) ? m[0] : "";
+}
+
 /* ---------- utilidades ---------- */
 const sectionNames = () => taxonomy.sections.map((s) => s.name);
 const sectionByName = (n) => taxonomy.sections.find((s) => s.name === n);
@@ -155,6 +188,7 @@ function renderRows() {
       <div class="sec"><b>${esc(p.line)}</b><small>${esc(p.category || "Sin categoría")}</small></div>
       <div class="brandcell">${esc(p.brand)}</div>
       <div class="pricecell"><b>${Number(p.price) > 0 ? new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(Number(p.price)) : "Sin precio"}</b><label><input type="checkbox" data-price-published ${p.pricePublished === true && Number(p.price) > 0 ? "checked" : ""} ${Number(p.price) > 0 ? "" : "disabled"} aria-label="Publicar precio de ${esc(p.code)}"> <span>${p.pricePublished === true && Number(p.price) > 0 ? "Publicado" : "No publicado"}</span></label></div>
+      <div class="cuotacell">${(() => { const c = dailyInstallment(p), l = planLabel(p); return c ? `<b>${esc(money(c))}</b><small>${esc(l)} · por día</small>` : (l ? `<b>—</b><small>${esc(l)}</small>` : "<b>—</b>"); })()}</div>
       <div class="acts">
         <button class="btn sm" data-edit type="button">Editar</button>
         <button class="btn sm danger-o" data-del type="button">Eliminar</button>
@@ -288,12 +322,28 @@ function openForm(p) {
   $("#fPriceYes").checked = !!(p && p.pricePublished === true);
   $("#fPriceNo").checked = !(p && p.pricePublished === true);
   $("#fVisibleChk").checked = p ? p.visible !== false : true;
+  $("#fPlan").value = p && PLAN_LABELS[p.plan] ? p.plan : "";
+  $("#fInstallment").value = p && Number(p.installment) > 0 ? p.installment : "";
+  updateInstallmentHint();
   $("#fFile").value = "";
   showPreview(form.preview);
   dlg.showModal();
   (p ? $("#fName") : $("#fCode")).focus();
 }
 $("#newProduct").addEventListener("click", () => openForm(null));
+
+// muestra la cuota automática (precio ÷ días del plan) mientras se edita
+function updateInstallmentHint() {
+  const tmp = { plan: $("#fPlan").value, brand: $("#fBrand").value, price: Number($("#fPrice").value) || 0 };
+  const days = planDays(tmp);
+  const hint = $("#installmentHint");
+  if ($("#fPlan").value === "contado") hint.textContent = "Contado: el sitio muestra el precio total, sin cuota diaria.";
+  else if (!days) hint.textContent = "Sin plan: el sitio muestra el precio total. Elegí un plan de cuotas para publicar cuota diaria.";
+  else if (tmp.price > 0) hint.textContent = `Cuota automática del plan ${days}: ${money(Math.ceil(tmp.price / days - 1e-9))} por día (precio ÷ ${days}). Dejá el campo vacío para usarla.`;
+  else hint.textContent = `Plan ${days}: cargá el precio para calcular la cuota automática.`;
+  $("#fInstallment").placeholder = tmp.price > 0 && days ? `Automática: ${Math.ceil(tmp.price / days - 1e-9)}` : "Automática";
+}
+["#fPlan", "#fPrice", "#fBrand"].forEach((s) => $(s).addEventListener("input", updateInstallmentHint));
 
 $("#fSec").addEventListener("change", () => {
   if ($("#fSec").value === NEW) {
@@ -356,21 +406,24 @@ $("#productForm").addEventListener("submit", (e) => {
   if (!code) return err("Completá el código.");
   if (!name) return err("Completá el nombre.");
   if ($("#fPrice").value !== "" && (!Number.isFinite(Number($("#fPrice").value)) || Number($("#fPrice").value) < 0)) return err("Ingresá un precio válido en pesos.");
+  if ($("#fInstallment").value !== "" && (!Number.isFinite(Number($("#fInstallment").value)) || Number($("#fInstallment").value) < 0)) return err("Ingresá una cuota diaria válida en pesos.");
   if ($("#fPriceYes").checked && Number($("#fPrice").value) <= 0) return err("Para publicar, ingresá un precio mayor a cero.");
   if (products.some((p) => p !== editing && p.code.toLowerCase() === code.toLowerCase())) return err(`Ya existe un artículo con el código ${code}.`);
 
   const p = editing || { id: uniqueId(code), featured: false };
-  const prevPrice = p.price;
+  const prevPrice = p.price, prevInstallment = Number(p.installment) > 0 ? Number(p.installment) : null;
   Object.assign(p, {
     line, category, code, name,
     brand: $("#fBrand").value.trim(),
     description: $("#fDesc").value.trim(),
     price: $("#fPrice").value === "" ? null : Number($("#fPrice").value),
     pricePublished: $("#fPriceYes").checked && Number($("#fPrice").value) > 0,
-    visible: $("#fVisibleChk").checked
+    visible: $("#fVisibleChk").checked,
+    plan: $("#fPlan").value,
+    installment: Number($("#fInstallment").value) > 0 ? Math.round(Number($("#fInstallment").value)) : null
   });
-  // si se cambia el precio a mano, la cuota diaria de la planilla deja de valer (el sitio la recalcula)
-  if (editing && prevPrice !== p.price) p.installment = null;
+  // si se cambia el precio y la cuota quedó como estaba, esa cuota ya no vale: se recalcula sola (precio ÷ días del plan)
+  if (editing && prevPrice !== p.price && p.installment === prevInstallment) p.installment = null;
   if (form.file) { p._file = form.file; p._preview = form.preview; p._clear = false; }
   else if (form.clear) { p.image = ""; p._file = null; p._preview = ""; p._clear = true; }
   if (!editing) products.unshift(p);
@@ -501,15 +554,6 @@ $("#xSection").addEventListener("change", () => { $("#xCategory").value = ""; re
 
 // Las columnas "Código … Redondeo de cuota" son las mismas que lee la importación,
 // así la planilla exportada se puede editar y volver a subir.
-// Misma regla que el sitio (app.js): marcas con Plan 210 (Inelro, Sol Real) muestran la cuota diaria
-// de la planilla o, si falta, precio / 210 redondeado hacia arriba.
-const PLAN_DIAS = 210, PLAN_BRANDS = ["inelro", "sol real"];
-function dailyInstallment(p) {
-  if (!PLAN_BRANDS.includes(String(p.brand || "").trim().toLowerCase())) return 0;
-  if (Number(p.installment) > 0) return Math.round(Number(p.installment));
-  if (Number(p.price) > 0) return Math.ceil(Number(p.price) / PLAN_DIAS - 1e-9);
-  return 0;
-}
 const EXPORT_COLUMNS = [
   ["Código", (p) => p.code],
   ["Sección", (p) => p.line],
@@ -519,13 +563,14 @@ const EXPORT_COLUMNS = [
   ["Descripción", (p) => p.description || ""],
   ["Precio publicado", (p) => (Number(p.price) > 0 ? Number(p.price) : "")],
   ["Redondeo de cuota", (p) => dailyInstallment(p) || ""],
+  ["Plan de cuotas", (p) => (p.plan ? PLAN_LABELS[p.plan] || "" : planDays(p) ? `${planDays(p)} cuotas (según marca)` : "")],
   ["Precio en el sitio", (p) => (p.pricePublished === true && Number(p.price) > 0 ? "Publicado" : "No publicado")],
   ["Visible en el sitio", (p) => (p.visible !== false ? "Sí" : "No")],
   ["Destacado", (p) => (p.featured === true ? "Sí" : "No")],
   ["Imagen", (p) => String(p.image || "").replace(/\?v=\d+$/, "")],
   ["ID", (p) => p.id]
 ];
-const EXPORT_WIDTHS = [12, 24, 26, 18, 38, 60, 16, 16, 18, 16, 11, 34, 18];
+const EXPORT_WIDTHS = [12, 24, 26, 18, 38, 60, 16, 16, 18, 18, 16, 11, 34, 18];
 const fileSlug = (t) => String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase();
 
 $("#exportSheet").addEventListener("click", () => {
@@ -597,6 +642,7 @@ function sheetColumns(rows) {
         brand: find("marca"),
         description: find("descripcion"),
         installment: find("redondeodecuota", "redondeodecuotaars", "cuotadiaria", "cuota"),
+        plan: find("plandecuotas", "plan", "tipodeplan"),
         publishedPrice, referencePrice
       };
     }
@@ -644,7 +690,9 @@ async function importPriceWorkbook(file) {
         brand: sheetCell(row, columns.brand),
         description: sheetCell(row, columns.description),
         price: primary !== null ? primary : reference,
-        installment: columns.installment >= 0 ? parseImportPrice(row[columns.installment]) : null
+        installment: columns.installment >= 0 ? parseImportPrice(row[columns.installment]) : null,
+        // texto como "90 cuotas", "Contado" o "210 cuotas (según marca)"; vacío o "(según marca)" = no cambia el plan
+        plan: columns.plan >= 0 && !/segun marca/i.test(String(row[columns.plan]).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) ? parsePlan(row[columns.plan]) : ""
       });
     }
     if (!incoming.length) throw new Error("La hoja no contiene artículos para importar.");
@@ -677,6 +725,7 @@ async function importPriceWorkbook(file) {
         if (item.description) product.description = item.description;
         if (item.price !== null) product.price = item.price;
         if (item.installment !== null) product.installment = item.installment;
+        if (item.plan) product.plan = item.plan;
         updated++;
       } else {
         let id = slug(item.code), suffix = 2;
@@ -686,7 +735,7 @@ async function importPriceWorkbook(file) {
           category: item.category, brand: item.brand, description: item.description,
           // la foto se busca primero en el panel y, si no hay, en la carpeta /fotos/<id>.webp del sitio
           image: "/api/image/" + encodeURIComponent(id), visible: true, featured: false, price: item.price,
-          installment: item.installment, pricePublished: false
+          installment: item.installment, plan: item.plan || "", pricePublished: false
         };
         next.push(product);
         ids.add(id);

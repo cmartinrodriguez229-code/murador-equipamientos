@@ -75,7 +75,7 @@ textarea{resize:vertical;min-height:84px}
 
 /* tabla */
 .table{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.row{display:grid;grid-template-columns:34px 78px 64px minmax(0,2fr) minmax(0,1.4fr) minmax(0,1fr) minmax(145px,1.2fr) 170px;gap:14px;align-items:center;padding:10px 14px;border-bottom:1px solid #eee}
+.row{display:grid;grid-template-columns:34px 78px 64px minmax(0,2fr) minmax(0,1.4fr) minmax(0,1fr) minmax(145px,1.2fr) minmax(120px,.9fr) 170px;gap:14px;align-items:center;padding:10px 14px;border-bottom:1px solid #eee}
 .row.head{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:#faf9f5}
 .row:last-child{border-bottom:0}
 .row.hidden-item{background:#faf9f5}
@@ -129,7 +129,7 @@ dialog form{padding:22px}
 @media(max-width:900px){
   .filters{grid-template-columns:1fr 1fr}
   .filters input{grid-column:1/-1}
-  .row{grid-template-columns:34px 70px 56px minmax(0,1.6fr) minmax(0,1fr) minmax(135px,1.1fr) 150px}
+  .row{grid-template-columns:34px 70px 56px minmax(0,1.6fr) minmax(0,1fr) minmax(135px,1.1fr) minmax(105px,.8fr) 150px}
   .row .brandcell{display:none}
   .row.head span:nth-child(6){display:none}
 }
@@ -150,7 +150,7 @@ dialog form{padding:22px}
 
   /* filas como tarjetas */
   .row.head{display:none}
-  .row{grid-template-columns:64px minmax(0,1fr);grid-template-areas:"sel sel" "img name" "img sec" "img brand" "img price" "vis acts";gap:2px 12px;padding:12px}
+  .row{grid-template-columns:64px minmax(0,1fr);grid-template-areas:"sel sel" "img name" "img sec" "img brand" "img price" "img cuota" "vis acts";gap:2px 12px;padding:12px}
   .row .selcell{grid-area:sel;margin-bottom:6px}
   .row .selcell span{display:inline}
   .row .thumb{grid-area:img;width:64px;height:64px}
@@ -159,6 +159,7 @@ dialog form{padding:22px}
   .row .brandcell{grid-area:brand;display:block;font-size:13px}
   .row .pricecell{grid-area:price;display:flex;flex-direction:row;align-items:center;gap:10px;font-size:13px;margin-top:5px}
   .row .vis{grid-area:vis;margin-top:10px}
+  .row .cuotacell{grid-area:cuota;display:flex;flex-direction:row;align-items:baseline;gap:8px}
   .row .acts{grid-area:acts;margin-top:10px}
 
   .seccard{padding:14px}
@@ -208,3 +209,11 @@ dialog form{padding:22px}
   .panel-head .product-tools{display:block}
 }
 .filters select{font-size:14px;padding-left:10px;padding-right:6px}
+
+/* cuota diaria */
+.cuotacell{display:flex;flex-direction:column;gap:2px;font-size:13px}
+.cuotacell b{white-space:nowrap;color:var(--purple)}
+.cuotacell small{color:var(--muted);font-weight:700;font-size:11px}
+.plan-controls{margin-top:10px}
+.plan-controls select{margin-top:6px}
+.plan-controls input[type=number]{display:block;width:100%;margin-top:6px;padding:11px 12px;border:1px solid #cfcabb;background:#fff;border-radius:8px;font-size:16px}

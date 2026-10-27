@@ -22,17 +22,24 @@ const wa = "5493434627755";
 
 /* ---------- PLAN 210 (cuotas diarias) ---------- */
 const PLAN_DIAS = 210;
-// Cuota diaria redondeada hacia arriba. Usa la columna "Redondeo de cuota (ARS)" de la planilla
-// si el admin la envía; si no, para Inelro la calcula como precio / 210 (misma fórmula de la lista).
-// Aplica a las marcas con Plan 210 (Inelro y Sol Real); el resto de las marcas queda como estaba.
+// Plan de cuotas del artículo (campo "plan" del admin): "210", "90", "120", "150", "180" o "contado".
+// Sin plan cargado, las marcas con Plan 210 (Inelro y Sol Real) usan 210; el resto de las marcas queda como estaba.
 const PLAN_BRANDS = ["inelro", "sol real"];
+function planDays(p) {
+  const plan = String(p.plan || "").trim().toLowerCase();
+  if (plan === "contado") return 0;
+  if (/^\d+$/.test(plan) && Number(plan) > 0) return Number(plan);
+  return PLAN_BRANDS.includes(String(p.brand || "").trim().toLowerCase()) ? PLAN_DIAS : 0;
+}
+// Cuota diaria redondeada hacia arriba: la de la planilla/admin si existe; si no, precio / días del plan.
 function dailyInstallment(p) {
-  if (!PLAN_BRANDS.includes(String(p.brand || "").trim().toLowerCase())) return 0;
+  const days = planDays(p);
+  if (!days) return 0;
   for (const k of ["installment", "dailyInstallment", "cuotaDiaria", "cuota", "redondeoCuota"]) {
     const v = Number(p[k]);
     if (v > 0) return Math.round(v);
   }
-  if (Number(p.price) > 0) return Math.ceil(Number(p.price) / PLAN_DIAS - 1e-9);
+  if (Number(p.price) > 0) return Math.ceil(Number(p.price) / days - 1e-9);
   return 0;
 }
 const money = value => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(Number(value) || 0);
@@ -166,7 +173,7 @@ function render() {
     if (cuota) {
       // Marcas con Plan 210 (Inelro, Sol Real): no se publica el valor total, solo la cuota diaria
       price.classList.add("plan-price");
-      price.innerHTML = '<span class="plan-badge">PLAN ' + PLAN_DIAS + ' · CUOTAS DIARIAS</span><span class="plan-amount">' + esc(money(cuota)) + ' <small>por día</small></span>';
+      price.innerHTML = '<span class="plan-badge">PLAN ' + planDays(p) + ' · CUOTAS DIARIAS</span><span class="plan-amount">' + esc(money(cuota)) + ' <small>por día</small></span>';
     } else price.textContent = money(p.price);
     const add = document.createElement("button");
     add.className = "consult add-cart btn-buy";
@@ -522,6 +529,7 @@ function openSheet(id) {
   else $("#sheetPrice").textContent = priced ? money(p.price) : "";
   $("#sheetPriceBox").hidden = !priced;
   $("#sheetPlanBadge").hidden = !cuota;
+  $("#sheetPlanBadge").textContent = "PLAN " + planDays(p) + " · CUOTAS DIARIAS";
   const fin = $("#sheetFinance");
   fin.hidden = !cuota;
   $("#sheetFinanceNote").hidden = !cuota;
@@ -556,7 +564,7 @@ $("#sheetFinance").onclick = e => {
   if (!p) return;
   const cuota = dailyInstallment(p);
   const text = "Hola Murador Equipamientos, quisiera consultar otra financiación para " + p.code + " — " + p.name +
-    (cuota ? "\nVi el Plan " + PLAN_DIAS + ": " + PLAN_DIAS + " cuotas diarias de " + money(cuota) : "") +
+    (cuota ? "\nVi el Plan " + planDays(p) + ": " + planDays(p) + " cuotas diarias de " + money(cuota) : "") +
     customerBlock();
   window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(text), "_blank", "noopener");
 };
