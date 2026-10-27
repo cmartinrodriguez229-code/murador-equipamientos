@@ -501,6 +501,15 @@ $("#xSection").addEventListener("change", () => { $("#xCategory").value = ""; re
 
 // Las columnas "Código … Redondeo de cuota" son las mismas que lee la importación,
 // así la planilla exportada se puede editar y volver a subir.
+// Misma regla que el sitio (app.js): marcas con Plan 210 (Inelro, Sol Real) muestran la cuota diaria
+// de la planilla o, si falta, precio / 210 redondeado hacia arriba.
+const PLAN_DIAS = 210, PLAN_BRANDS = ["inelro", "sol real"];
+function dailyInstallment(p) {
+  if (!PLAN_BRANDS.includes(String(p.brand || "").trim().toLowerCase())) return 0;
+  if (Number(p.installment) > 0) return Math.round(Number(p.installment));
+  if (Number(p.price) > 0) return Math.ceil(Number(p.price) / PLAN_DIAS - 1e-9);
+  return 0;
+}
 const EXPORT_COLUMNS = [
   ["Código", (p) => p.code],
   ["Sección", (p) => p.line],
@@ -509,7 +518,7 @@ const EXPORT_COLUMNS = [
   ["Nombre", (p) => p.name],
   ["Descripción", (p) => p.description || ""],
   ["Precio publicado", (p) => (Number(p.price) > 0 ? Number(p.price) : "")],
-  ["Redondeo de cuota", (p) => (Number(p.installment) > 0 ? Number(p.installment) : "")],
+  ["Redondeo de cuota", (p) => dailyInstallment(p) || ""],
   ["Precio en el sitio", (p) => (p.pricePublished === true && Number(p.price) > 0 ? "Publicado" : "No publicado")],
   ["Visible en el sitio", (p) => (p.visible !== false ? "Sí" : "No")],
   ["Destacado", (p) => (p.featured === true ? "Sí" : "No")],
