@@ -632,3 +632,6 @@ body.modal-open{overflow:hidden}
   .hero{min-height:calc(100vh - 66px);min-height:calc(100dvh - 66px)}
   .hero-stamp img{height:calc((100vh - 66px) * .86);height:calc((100dvh - 66px) * .86)}
 }
+
+/* Botones de WhatsApp e Instagram (contacto) con bordes redondeados */
+.social{border-radius:14px}
