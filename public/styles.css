@@ -617,13 +617,18 @@ body.modal-open{overflow:hidden}
   .plan-price .plan-amount{font-size:17px}
 }
 
-/* ===== CELULAR HORIZONTAL: portada como en desktop (texto a la izquierda, diagonal y logo sobre amarillo) ===== */
+/* ===== CELULAR HORIZONTAL: portada como en desktop, a todo el alto disponible hasta el Índice ===== */
 @media (orientation:landscape) and (max-height:700px) and (max-width:1000px){
-  .hero{flex-direction:row !important;min-height:0;background:#f2c400 !important}
-  .hero-inner{flex:0 0 64%;max-width:64%;padding:4vh max(2.5vw,16px) 4vh max(4vw,20px);clip-path:polygon(0 0,100% 0,90% 100%,0 100%)}
+  .hero{flex-direction:row !important;min-height:calc(100vh - 78px);min-height:calc(100dvh - 78px);background:#f2c400 !important}
+  .hero-inner{flex:0 0 56%;max-width:56%;display:flex;flex-direction:column;justify-content:center;padding:3vh 2vw 3vh max(4vw,20px);clip-path:polygon(0 0,100% 0,82% 100%,0 100%)}
   .hero .kicker-yellow{font-size:min(10px,2.6vh);letter-spacing:.3em !important;margin:0 0 2.5vh}
-  .hero h1{font-size:min(8.5vh,5.2vw) !important;margin:0 0 2.5vh}
-  .hero p:not(.kicker-yellow){max-width:none;font-size:max(8px,min(1.6vw,4vh));line-height:1.45;margin:0;max-width:none !important;white-space:nowrap}
-  .hero-stamp{flex:1;max-width:none;padding:3vh 2vw;background:none}
-  .hero-stamp img{width:min(190px,48vh)}
+  .hero h1{font-size:min(8.6vh,5.2vw) !important;margin:0 0 2.5vh}
+  .hero p:not(.kicker-yellow){max-width:38vw !important;font-size:max(8px,min(1.5vw,4vh));line-height:1.45;margin:0;text-wrap:balance}
+  .hero p br{display:none}
+  .hero-stamp{flex:1;max-width:none;padding:2vh 2vw;background:none}
+  .hero-stamp img{width:auto;max-width:92%;height:calc((100vh - 78px) * .86);height:calc((100dvh - 78px) * .86)}
+}
+@media (orientation:landscape) and (max-height:700px) and (max-width:700px){
+  .hero{min-height:calc(100vh - 66px);min-height:calc(100dvh - 66px)}
+  .hero-stamp img{height:calc((100vh - 66px) * .86);height:calc((100dvh - 66px) * .86)}
 }
