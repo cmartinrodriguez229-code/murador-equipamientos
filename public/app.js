@@ -13,8 +13,10 @@ let sections = DEFAULT_SECTIONS;
 
 // Fichas por página según el ancho: 2 filas completas cuando entran 4 o más columnas (8, 10, 12…),
 // 3 filas con 3 columnas (9) y 8 en celular. Replica la grilla de .products en styles.css.
+const LANDSCAPE_PHONE = "(orientation:landscape) and (max-height:700px) and (max-width:1000px)"; // igual que la regla CSS de celular horizontal
 function gridColumns() {
   const w = innerWidth;
+  if (matchMedia(LANDSCAPE_PHONE).matches) return 3; // celular horizontal: 3 fichas por fila
   if (w <= 340) return 1;
   if (w <= 640) return 2;
   const box = document.getElementById("products");
