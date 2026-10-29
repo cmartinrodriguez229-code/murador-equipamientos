@@ -354,22 +354,21 @@ footer{padding:22px max(6vw,22px);background:#171717;border-top:6px solid #f2c40
 .close{float:right;border:0;background:none;font-size:32px;cursor:pointer}
 img{max-width:100%}
 
-/* PAGINADO: una sola línea en todos los dispositivos */
-.pager{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:6px;margin:34px auto 0;max-width:100%}
-.pg{flex:0 1 42px;min-width:28px;height:42px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid #171717;background:#fff;color:#171717;font:800 14px "Segoe UI",Roboto,Arial,sans-serif;cursor:pointer;border-radius:2px;transition:background .15s,color .15s}
+/* PAGINADO: una sola línea, ocupa todo el ancho disponible (la cantidad de botones la calcula app.js según el ancho) */
+.pager{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:6px;margin:34px 0 0;width:100%}
+.pg{flex:1 1 40px;min-width:0;max-width:64px;height:42px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid #171717;background:#fff;color:#171717;font:800 14px "Segoe UI",Roboto,Arial,sans-serif;cursor:pointer;border-radius:2px;transition:background .15s,color .15s}
 .pg:hover:not(:disabled):not(.active){background:#efede4}
 .pg.active{background:#171717;color:#fff;cursor:default}
 .pg:disabled{opacity:.35;cursor:not-allowed}
 .pg:focus-visible{outline:3px solid #f2c400;outline-offset:2px}
-.pg-arrow{flex-basis:46px;background:#f2c400;border-color:#171717}
+.pg-arrow{flex:0 0 46px;max-width:none;background:#f2c400;border-color:#171717}
 .pg-arrow:disabled{background:#fff}
-.pg-gap{border:0;background:none;cursor:default;flex-basis:20px;min-width:14px;color:#777}
+.pg-gap{border:0;background:none;cursor:default;color:#777}
 .pg svg{display:block}
 @media(max-width:480px){
   .pager{gap:3px}
-  .pg{height:38px;font-size:13px;min-width:24px;flex-basis:36px}
-  .pg-arrow{flex-basis:38px}
-  .pg-gap{flex-basis:12px;min-width:10px}
+  .pg{flex-basis:34px;height:38px;font-size:13px}
+  .pg-arrow{flex:0 0 38px}
 }
 
 /* FAVORITOS */

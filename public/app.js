@@ -221,29 +221,36 @@ function render() {
 const ARROW_L = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 12H4M10 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ARROW_R = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-function pageList(total, cur) {
-  // 1 … 4 5 6 … 8  (siempre como máximo 7 posiciones, para que entre en una sola línea)
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const set = new Set([1, total, cur - 1, cur, cur + 1]);
-  if (cur <= 3) [2, 3, 4].forEach(n => set.add(n));
-  if (cur >= total - 2) [total - 3, total - 2, total - 1].forEach(n => set.add(n));
-  const nums = [...set].filter(n => n >= 1 && n <= total).sort((a, b) => a - b);
-  const out = [];
-  nums.forEach((n, i) => {
-    if (i && n - nums[i - 1] > 1) out.push("…");
-    out.push(n);
-  });
-  return out;
+// Cuántas posiciones (números y "…") entran en el ancho real del paginador. Debe coincidir con las medidas de .pg en styles.css.
+function pagerSlots(nav) {
+  const small = innerWidth <= 480;
+  const btn = small ? 34 : 40, gap = small ? 3 : 6, arrow = small ? 38 : 46;
+  const w = nav.clientWidth || (innerWidth - 2 * Math.max(0.06 * innerWidth, 22));
+  return Math.max(5, Math.floor((w - 2 * arrow - gap) / (btn + gap)));
 }
 
+// Lista de páginas que llena el ancho disponible: 1 … 4 5 6 7 8 … 28 (slots = cantidad máxima de posiciones)
+function pageList(total, cur, slots) {
+  if (total <= slots) return Array.from({ length: total }, (_, i) => i + 1);
+  const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  if (cur <= slots - 3) return [...range(1, slots - 2), "…", total];                    // cerca del inicio
+  if (cur >= total - (slots - 4)) return [1, "…", ...range(total - (slots - 3), total)]; // cerca del final
+  const w = slots - 4;                                                                     // ventana central
+  const start = Math.min(Math.max(cur - Math.floor((w - 1) / 2), 3), total - 2 - w);
+  return [1, "…", ...range(start, start + w - 1), "…", total];
+}
+
+let lastTotalPages = 1;
 function renderPager(total) {
+  lastTotalPages = total;
   const nav = $("#pager");
   nav.hidden = total <= 1;
   if (total <= 1) { nav.innerHTML = ""; return; }
+  const slots = pagerSlots(nav);
 
   nav.innerHTML =
     `<button type="button" class="pg pg-arrow" data-go="${page - 1}" aria-label="Página anterior" ${page === 1 ? "disabled" : ""}>${ARROW_L}</button>` +
-    pageList(total, page).map(n => n === "…"
+    pageList(total, page, slots).map(n => n === "…"
       ? '<span class="pg pg-gap" aria-hidden="true">…</span>'
       : `<button type="button" class="pg${n === page ? " active" : ""}" data-go="${n}" aria-label="Página ${n}"${n === page ? ' aria-current="page"' : ""}>${n}</button>`
     ).join("") +
@@ -619,7 +626,7 @@ addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     const size = pageSize();
-    if (size === lastPageSize) return;
+    if (size === lastPageSize) { renderPager(lastTotalPages); return; } // mismas fichas por página: solo se reacomodan los botones al nuevo ancho
     page = Math.floor(((page - 1) * lastPageSize) / size) + 1; // mantiene en pantalla el primer artículo que se estaba viendo
     lastPageSize = size;
     render();
