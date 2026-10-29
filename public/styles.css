@@ -578,10 +578,10 @@ body.modal-open{overflow:hidden}
 .sheet-price,.cart-subtotal strong{font-weight:800;font-variant-numeric:lining-nums}
 .cartinfo small{font-weight:700}
 
-/* ===== 13. CELULAR HORIZONTAL: LÍNEAS, CATEGORÍAS, MARCAS y LIMPIAR FILTROS en una sola línea ===== */
+/* ===== 13. CELULAR HORIZONTAL: BUSCAR, LÍNEAS, CATEGORÍAS, MARCAS y LIMPIAR FILTROS en una sola línea ===== */
 @media (orientation:landscape) and (max-height:700px) and (max-width:1000px){
-  .filters{grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:6px;padding:8px 0;margin-bottom:18px}
-  .filters input{grid-column:1/-1}
+  .filters{grid-template-columns:minmax(0,1.5fr) repeat(3,minmax(0,1fr)) auto;gap:6px;padding:8px 0;margin-bottom:18px}
+  .filters input{grid-column:auto;padding:10px 8px;font-size:12px}
   .filters select{padding:10px 6px;font-size:12px}
   .clear-filters{grid-column:auto;padding:10px 12px;font-size:11px}
 }
