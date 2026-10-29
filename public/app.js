@@ -11,7 +11,21 @@ const DEFAULT_SECTIONS = [
 ];
 let sections = DEFAULT_SECTIONS;
 
-const PAGE_SIZE = 8;
+// Fichas por página según el ancho: 2 filas completas cuando entran 4 o más columnas (8, 10, 12…),
+// 3 filas con 3 columnas (9) y 8 en celular. Replica la grilla de .products en styles.css.
+function gridColumns() {
+  const w = innerWidth;
+  if (w <= 340) return 1;
+  if (w <= 640) return 2;
+  const box = document.getElementById("products");
+  const avail = (box && box.clientWidth) || (w - 2 * Math.max(0.06 * w, 22));
+  return Math.max(1, Math.floor((avail + 20) / 300)); // auto-fill cuenta con el ancho máximo de la columna (280px + 20px de separación)
+}
+function pageSize() {
+  const cols = gridColumns();
+  if (cols >= 4) return cols * 2;
+  return cols === 3 ? 9 : 8;
+}
 let page = 1;
 
 let all = [],
@@ -123,6 +137,7 @@ function render() {
   $("#resultCount").textContent = `${list.length} artículos`;
   $("#empty").hidden = !!list.length;
 
+  const PAGE_SIZE = pageSize();
   const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
   if (page > totalPages) page = totalPages;
   const pageItems = list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -596,6 +611,19 @@ document.addEventListener("keydown", e => {
 
 ["#search", "#lineFilter", "#categoryFilter", "#brandFilter"].forEach(s => {
   $(s).addEventListener(s === "#search" ? "input" : "change", () => { page = 1; render(); });
+});
+
+/* al cambiar el ancho (girar el celular, redimensionar) se recalcula cuántas fichas entran */
+let lastPageSize = pageSize(), resizeTimer;
+addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const size = pageSize();
+    if (size === lastPageSize) return;
+    page = Math.floor(((page - 1) * lastPageSize) / size) + 1; // mantiene en pantalla el primer artículo que se estaba viendo
+    lastPageSize = size;
+    render();
+  }, 150);
 });
 
 /* limpiar filtros */
