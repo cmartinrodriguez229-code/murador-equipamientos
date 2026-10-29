@@ -595,3 +595,7 @@ body.modal-open{overflow:hidden}
 /* Descripciones: misma tipografía que el admin (Segoe UI 15px) y gris más oscuro para que se lea mejor */
 .sheet-desc,.product .desc{font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#3a3833}
 .sheet-desc{font-size:15px;line-height:1.45}
+
+/* Ficha con descripción larga: la foto queda arriba (y acompaña al hacer scroll) en vez de centrada en la columna */
+.sheet-photo{align-content:start;align-items:start;justify-items:center}
+.sheet-photo img{position:sticky;top:20px}
