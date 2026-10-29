@@ -585,3 +585,10 @@ body.modal-open{overflow:hidden}
   .filters select{padding:10px 6px;font-size:12px}
   .clear-filters{grid-column:auto;padding:10px 12px;font-size:11px}
 }
+
+/* Tipografía Montserrat: títulos y descripciones de fichas (grilla y ventana de detalle) */
+.product h3,.product .desc,.sheet-info h3,.sheet-desc{font-family:"Montserrat","Segoe UI",Arial,sans-serif}
+.product h3,.sheet-info h3{font-weight:700;letter-spacing:-.01em}
+.product h3{font-size:16px;line-height:1.15}
+.sheet-info h3{font-size:clamp(20px,2.6vw,26px);line-height:1.15}
+@media (max-width:640px){.product h3{font-size:13px}}
