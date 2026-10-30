@@ -58,6 +58,23 @@ function dailyInstallment(p) {
   if (Number(p.price) > 0) return Math.ceil(Number(p.price) / days - 1e-9);
   return 0;
 }
+// Planes ofrecidos en la ficha. Interés de cada plan (el de las planillas es 18% en el Plan 210).
+// Cuando haya otros porcentajes, cambiarlos acá: cuota = precio × (1+interés del plan) ÷ (1+interés del plan base) ÷ días, redondeada hacia arriba.
+const PLAN_OPTIONS = [90, 120, 150, 180, 210];
+const PLAN_INTEREST = { 90: 0.18, 120: 0.18, 150: 0.18, 180: 0.18, 210: 0.18 };
+// Cuota diaria de un plan elegido en la ficha (días). Para el plan propio del artículo usa la cuota de la planilla.
+function installmentForPlan(p, days) {
+  const own = planDays(p);
+  if (!own || !days) return 0;
+  if (days === own) return dailyInstallment(p);
+  const own$ = dailyInstallment(p);
+  const base = Number(p.price) > 0 ? Number(p.price) : own$ * own;
+  if (!(base > 0)) return 0;
+  const total = base * (1 + (PLAN_INTEREST[days] ?? 0.18)) / (1 + (PLAN_INTEREST[own] ?? 0.18));
+  let c = Math.ceil(total / days - 1e-9);
+  if (String(p.brand || "").trim().toLowerCase() === "sol real" && c % 2) c++; // Sol Real redondea al par (EVEN)
+  return c;
+}
 const money = value => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(Number(value) || 0);
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({
@@ -546,16 +563,21 @@ function openSheet(id) {
   $("#sheetMeta").textContent = [p.brand, p.category].filter(Boolean).join(" · ");
   $("#sheetDesc").textContent = p.description || "Consultanos por especificaciones, precio y disponibilidad.";
   const cuota = priced ? dailyInstallment(p) : 0;
-  // Marcas con Plan 210 (Inelro, Sol Real): se muestra solo la cuota diaria (sin valor total); resto de marcas: precio como siempre
-  if (cuota) $("#sheetPrice").innerHTML = esc(money(cuota)) + ' <small>por día</small>';
-  else $("#sheetPrice").textContent = priced ? money(p.price) : "";
+  const sel = $("#sheetPlan");
+  $("#sheetPlanBox").hidden = !cuota;
   $("#sheetPriceBox").hidden = !priced;
-  $("#sheetPlanBadge").hidden = !cuota;
-  $("#sheetPlanBadge").textContent = "PLAN " + planDays(p) + " · CUOTAS DIARIAS";
   const fin = $("#sheetFinance");
   fin.hidden = !cuota;
   $("#sheetFinanceNote").hidden = !cuota;
   fin.dataset.id = p.id;
+  sel.dataset.id = p.id;
+  if (cuota) {
+    const own = planDays(p);
+    sel.innerHTML = PLAN_OPTIONS.map(d => '<option value="' + d + '">PLAN ' + d + '</option>').join("");
+    sel.value = String(own);
+    if (sel.value !== String(own)) sel.insertAdjacentHTML("afterbegin", '<option value="' + own + '">PLAN ' + own + '</option>'), sel.value = String(own);
+  }
+  updateSheetPlan(p);
   if (p.image) { img.style.display = ""; img.src = p.image; img.alt = p.name; }
   else { img.removeAttribute("src"); img.style.display = "none"; }
   const buy = $("#sheetBuy");
@@ -567,6 +589,20 @@ function openSheet(id) {
   $("#sheetModal .sheet-box").scrollTop = 0;
   $("#sheetClose").focus();
 }
+// Muestra la cuota diaria del plan elegido en el select
+function updateSheetPlan(p) {
+  const priced = p.pricePublished === true && Number(p.price) > 0;
+  const days = Number($("#sheetPlan").value) || planDays(p);
+  const cuota = priced && planDays(p) ? installmentForPlan(p, days) : 0;
+  if (cuota) $("#sheetPrice").innerHTML = esc(money(cuota)) + ' <small>por día</small>';
+  else $("#sheetPrice").textContent = priced ? money(p.price) : "";
+  $("#sheetPlanBadge").hidden = !cuota;
+  $("#sheetPlanBadge").textContent = "PLAN " + days + " · CUOTAS DIARIAS";
+}
+$("#sheetPlan").onchange = e => {
+  const p = all.find(x => x.id === e.currentTarget.dataset.id);
+  if (p) updateSheetPlan(p);
+};
 function closeSheet() {
   $("#sheetModal").hidden = true;
   document.body.classList.remove("modal-open");
@@ -584,9 +620,10 @@ $("#sheetBuy").onclick = e => {
 $("#sheetFinance").onclick = e => {
   const p = all.find(x => x.id === e.currentTarget.dataset.id);
   if (!p) return;
-  const cuota = dailyInstallment(p);
+  const days = Number($("#sheetPlan").value) || planDays(p);
+  const cuota = installmentForPlan(p, days);
   const text = "Hola Murador Equipamientos, quisiera consultar otra financiación para " + p.code + " — " + p.name +
-    (cuota ? "\nVi el Plan " + planDays(p) + ": " + planDays(p) + " cuotas diarias de " + money(cuota) : "") +
+    (cuota ? "\nVi el Plan " + days + ": " + days + " cuotas diarias de " + money(cuota) : "") +
     customerBlock();
   window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(text), "_blank", "noopener");
 };
