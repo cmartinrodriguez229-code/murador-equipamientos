@@ -146,17 +146,14 @@ function render() {
   renderPager(totalPages);
 
   $("#products").innerHTML = pageItems.map(p => `
-    <article class="product">
+    <article class="product" data-open="${esc(p.id)}" tabindex="0" aria-label="Ver ficha de ${esc(p.name)}">
 
       <!-- CÓDIGO Y CATEGORÍA: AHORA ANTES DE LA FOTO -->
- 
+
 
       <div class="photo">
            <p class="code">${esc(p.code)}</p>
         <img
-          class="zoomable"
-          tabindex="0"
-          role="button"
           src="${esc(p.image || "")}"
           alt="${esc(p.name)}"
           onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
@@ -533,6 +530,7 @@ function openLightbox(src, alt) {
 }
 function closeLightbox() {
   $("#lightbox").hidden = true;
+  $("#lbLens").hidden = true;
   $("#lbImg").removeAttribute("src");
   if ($("#sheetModal").hidden) document.body.classList.remove("modal-open");
 }
@@ -592,22 +590,59 @@ $("#sheetFinance").onclick = e => {
     customerBlock();
   window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(text), "_blank", "noopener");
 };
+// Tocar cualquier parte de la ficha abre el popup, salvo los botones (COMPRAR, CONSULTAR PRECIO, favoritos).
+// VER FICHA también abre el popup.
 $("#products").addEventListener("click", e => {
-  const b = e.target.closest("[data-sheet]");
-  if (b) openSheet(b.dataset.sheet);
-});
-
-$("#products").addEventListener("click", e => {
-  const img = e.target.closest("img.zoomable");
-  if (img && img.getAttribute("src")) openLightbox(img.currentSrc || img.src, img.alt);
+  const art = e.target.closest("article.product");
+  if (!art) return;
+  const btn = e.target.closest("button, a");
+  if (btn && !btn.matches("[data-sheet]")) return;
+  openSheet(art.dataset.open);
 });
 $("#products").addEventListener("keydown", e => {
-  if ((e.key === "Enter" || e.key === " ") && e.target.matches("img.zoomable")) {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches("article.product")) {
     e.preventDefault();
-    openLightbox(e.target.currentSrc || e.target.src, e.target.alt);
+    openSheet(e.target.dataset.open);
   }
 });
 $("#lbClose").onclick = closeLightbox;
+
+/* ---------- LUPA SOBRE LA FOTO AMPLIADA ---------- */
+const LENS_ZOOM = 2.5;
+const lbImg = $("#lbImg"), lens = $("#lbLens");
+// Rectángulo real que ocupa la foto dentro del <img> (object-fit: contain deja bordes vacíos)
+function lbPhotoRect() {
+  const r = lbImg.getBoundingClientRect();
+  const nw = lbImg.naturalWidth, nh = lbImg.naturalHeight;
+  if (!nw || !nh) return r;
+  const s = Math.min(r.width / nw, r.height / nh);
+  const w = nw * s, h = nh * s;
+  return { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h };
+}
+function moveLens(e) {
+  const ph = lbPhotoRect();
+  const x = e.clientX - ph.left, y = e.clientY - ph.top;
+  if (x < 0 || y < 0 || x > ph.width || y > ph.height) { hideLens(); return; }
+  const size = lens.offsetWidth || 180;
+  const touch = e.pointerType === "touch";
+  // con el dedo la lupa se ubica arriba del punto tocado para que no la tape
+  const cx = e.clientX, cy = e.clientY - (touch ? size * 0.8 : 0);
+  lens.hidden = false;
+  lens.style.left = (cx - size / 2) + "px";
+  lens.style.top = (cy - size / 2) + "px";
+  lens.style.backgroundImage = 'url("' + (lbImg.currentSrc || lbImg.src) + '")';
+  lens.style.backgroundSize = (ph.width * LENS_ZOOM) + "px " + (ph.height * LENS_ZOOM) + "px";
+  lens.style.backgroundPosition = (size / 2 - x * LENS_ZOOM) + "px " + (size / 2 - y * LENS_ZOOM) + "px";
+}
+function hideLens() { lens.hidden = true; }
+lbImg.addEventListener("pointermove", e => {
+  if (e.pointerType === "touch" && !(e.buttons & 1)) return;
+  moveLens(e);
+});
+lbImg.addEventListener("pointerdown", e => { if (e.pointerType === "touch") moveLens(e); });
+lbImg.addEventListener("pointerup", e => { if (e.pointerType === "touch") hideLens(); });
+lbImg.addEventListener("pointercancel", hideLens);
+lbImg.addEventListener("pointerleave", hideLens);
 $("#lightbox").onclick = e => { if (e.target.id === "lightbox") closeLightbox(); };
 
 document.addEventListener("keydown", e => {

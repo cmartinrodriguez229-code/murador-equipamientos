@@ -382,8 +382,17 @@ img{max-width:100%}
 .favremove:hover{background:#171717;color:#fff;border-color:#171717}
 .favempty{font:15px/1.5 "Segoe UI",Roboto,Arial,sans-serif;color:#595950}
 
+/* FICHA CLICKEABLE: toda la tarjeta abre el popup */
+.product{cursor:pointer}
+.product button{cursor:pointer}
+.product:focus-visible{outline:3px solid #7b3f97;outline-offset:2px}
+
 /* FOTO AMPLIADA */
-.photo img.zoomable{cursor:zoom-in}
+.lightbox img{cursor:crosshair;touch-action:none;-webkit-user-select:none;user-select:none}
+/* Lupa con recuadro: muestra ampliada la zona de la foto bajo el cursor */
+.lb-lens{position:fixed;z-index:3;width:190px;height:190px;border:3px solid #f2c400;border-radius:4px;background-color:#fff;background-repeat:no-repeat;box-shadow:0 6px 24px rgba(0,0,0,.55);pointer-events:none}
+.lb-lens[hidden]{display:none !important}
+@media(max-width:640px){.lb-lens{width:150px;height:150px}}
 .lightbox{position:fixed;inset:0;z-index:200;background:rgba(10,10,10,.88);display:grid;place-items:center;padding:12px}
 .lightbox[hidden]{display:none !important}
 .lightbox img{width:min(96vw,1100px);height:min(88vh,1100px);height:min(88dvh,1100px);object-fit:contain;background:#fff;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
