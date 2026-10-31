@@ -644,9 +644,3 @@ body.modal-open{overflow:hidden}
 
 /* Botones de WhatsApp e Instagram (contacto) con bordes redondeados */
 .social{border-radius:14px}
-
-.sheet-planbox{display:flex;flex-direction:column;gap:6px;margin:4px 0 10px}
-.sheet-planbox[hidden]{display:none}
-.sheet-planbox label{font-size:12px;font-weight:800;letter-spacing:.06em;color:#171717}
-.sheet-planbox select{width:100%;padding:12px 14px;border:2px solid #7b3f97;background:#fff;color:#171717;font:inherit;font-weight:800;font-size:14px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
-.sheet-planbox select:focus-visible{outline:3px solid #f2c400;outline-offset:2px}
