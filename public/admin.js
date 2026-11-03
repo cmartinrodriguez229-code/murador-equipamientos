@@ -734,7 +734,7 @@ async function importPriceWorkbook(file) {
           id, code: item.code, name: item.name, line: item.line,
           category: item.category, brand: item.brand, description: item.description,
           // la foto se busca primero en el panel y, si no hay, en la carpeta /fotos/<id>.webp del sitio
-          image: "/fotos/" + encodeURIComponent(id), visible: true, featured: false, price: item.price,
+          image: "/api/image/" + encodeURIComponent(id), visible: true, featured: false, price: item.price,
           installment: item.installment, plan: item.plan || "", pricePublished: false
         };
         next.push(product);
