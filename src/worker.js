@@ -217,8 +217,13 @@ async function serveImage(env, req, ctx, id) {
     res = new Response(value, { headers: { "content-type": metadata?.type || "image/webp", "cache-control": cc } });
   } else {
     // sin foto subida desde el panel: se usa la foto original incluida en el sitio
-    const r = await env.ASSETS.fetch(new URL(`/fotos/${id}.webp`, req.url));
-    if (!r.ok) return new Response("Not found", { status: 404 });
+    // el id va en minúsculas (mor-001) pero los archivos pueden estar como MOR-001.webp: se prueban ambas formas y las dos carpetas
+    let r = null;
+    for (const f of [`/fotos/${id}.webp`, `/fotos/${id.toUpperCase()}.webp`, `/assets/products/${id}.webp`, `/assets/products/${id.toUpperCase()}.webp`]) {
+      const t = await env.ASSETS.fetch(new URL(f, req.url));
+      if (t.ok && String(t.headers.get("content-type") || "").startsWith("image/")) { r = t; break; }
+    }
+    if (!r) return new Response("Not found", { status: 404 });
     res = new Response(r.body, { headers: { "content-type": "image/webp", "cache-control": cc } });
   }
   ctx.waitUntil(cache.put(cacheKey, res.clone()));
