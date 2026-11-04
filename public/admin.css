@@ -70,7 +70,7 @@ textarea{resize:vertical;min-height:84px}
 .panel-head p{margin:6px 0 0}
 
 /* filtros */
-.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 .filters input,.filters select{margin:0}
 
 /* tabla */

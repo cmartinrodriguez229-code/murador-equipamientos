@@ -150,6 +150,18 @@ function brandCanon() {
 const matchBrand = (p, b) => !b || (b === NO_BRAND ? !String(p.brand || "").trim() : String(p.brand || "").trim() === b);
 const categoriesFor = (sec) => sec ? (sectionByName(sec)?.categories || []) : [...new Set(taxonomy.sections.flatMap((s) => s.categories))];
 
+// Filtro por plan de cuotas: usa el plan efectivo del artículo (el elegido o el de su marca); "none" = sin plan
+const planKey = (p) => String(p.plan || "").trim().toLowerCase() === "contado" ? "contado" : planDays(p) ? String(planDays(p)) : "none";
+const matchPlan = (p, k) => !k || planKey(p) === k;
+function planFilterOptions(current) {
+  const keys = [...new Set(products.map(planKey))];
+  const nums = keys.filter((k) => /^\d+$/.test(k)).sort((a, b) => Number(a) - Number(b));
+  const opts = [...nums.map((k) => [k, `Plan ${k} (${products.filter((p) => planKey(p) === k).length})`])];
+  if (keys.includes("contado")) opts.push(["contado", `Contado (${products.filter((p) => planKey(p) === "contado").length})`]);
+  if (keys.includes("none")) opts.push(["none", `Sin plan (${products.filter((p) => planKey(p) === "none").length})`]);
+  return `<option value="">Todos los planes</option>` + opts.map(([v, l]) => `<option value="${v}"${v === current ? " selected" : ""}>${l}</option>`).join("");
+}
+
 function renderFilters() {
   const sec = $("#fSection").value, cat = $("#fCategory").value, brand = $("#fBrandFilter").value;
   $("#fSection").innerHTML = optionList(sectionNames(), sec, "Todas las secciones");
@@ -159,15 +171,17 @@ function renderFilters() {
   if (!cats.includes(cat)) $("#fCategory").value = "";
   $("#fBrandFilter").innerHTML = brandOptions(brand, "Todas las marcas");
   if (brand && ![...brandNames(), NO_BRAND].includes(brand)) $("#fBrandFilter").value = "";
+  const plan = $("#fPlanFilter").value;
+  $("#fPlanFilter").innerHTML = planFilterOptions(plan);
   renderExportFilters();
 }
-["#q", "#fCategory", "#fBrandFilter", "#fVisible"].forEach((s) => $(s).addEventListener("input", renderRows));
+["#q", "#fCategory", "#fBrandFilter", "#fPlanFilter", "#fVisible"].forEach((s) => $(s).addEventListener("input", renderRows));
 $("#fSection").addEventListener("change", () => { $("#fCategory").value = ""; renderFilters(); renderRows(); });
 
 function filtered() {
   const q = $("#q").value.trim().toLowerCase();
-  const sec = $("#fSection").value, cat = $("#fCategory").value, vis = $("#fVisible").value, brand = $("#fBrandFilter").value;
-  return products.filter((p) =>
+  const sec = $("#fSection").value, cat = $("#fCategory").value, vis = $("#fVisible").value, brand = $("#fBrandFilter").value, plan = $("#fPlanFilter").value;
+  return products.filter((p) => matchPlan(p, plan) &&
     (!q || [p.code, p.name, p.brand, p.description].join(" ").toLowerCase().includes(q)) &&
     (!sec || p.line === sec) && (!cat || p.category === cat) && matchBrand(p, brand) &&
     (!vis || (vis === "1") === (p.visible !== false)));
