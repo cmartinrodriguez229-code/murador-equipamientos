@@ -138,6 +138,15 @@ function brandOptions(selectedValue, placeholder) {
   return optionList(brandNames(), selectedValue, placeholder) +
     (hasNoBrand() ? `<option value="${NO_BRAND}"${selectedValue === NO_BRAND ? " selected" : ""}>(Sin marca)</option>` : "");
 }
+// Marca "canónica": si ya existe "Nativa", "NATIVA" o "nativa" usan esa misma grafía (gana la del artículo más antiguo), así no se duplican en los filtros
+function brandCanon() {
+  const m = new Map();
+  for (const p of products) {
+    const b = String(p.brand || "").trim();
+    if (b && !m.has(b.toLocaleLowerCase("es-AR"))) m.set(b.toLocaleLowerCase("es-AR"), b);
+  }
+  return m;
+}
 const matchBrand = (p, b) => !b || (b === NO_BRAND ? !String(p.brand || "").trim() : String(p.brand || "").trim() === b);
 const categoriesFor = (sec) => sec ? (sectionByName(sec)?.categories || []) : [...new Set(taxonomy.sections.flatMap((s) => s.categories))];
 
@@ -414,7 +423,7 @@ $("#productForm").addEventListener("submit", (e) => {
   const prevPrice = p.price, prevInstallment = Number(p.installment) > 0 ? Number(p.installment) : null;
   Object.assign(p, {
     line, category, code, name,
-    brand: $("#fBrand").value.trim(),
+    brand: (() => { const b = $("#fBrand").value.trim(); return brandCanon().get(b.toLocaleLowerCase("es-AR")) || b; })(),
     description: $("#fDesc").value.trim(),
     price: $("#fPrice").value === "" ? null : Number($("#fPrice").value),
     pricePublished: $("#fPriceYes").checked && Number($("#fPrice").value) > 0,
@@ -719,7 +728,15 @@ async function importPriceWorkbook(file) {
       }
     }
 
+    // Marcas: se unifican sin distinguir mayúsculas (NATIVA = Nativa) usando la grafía que ya existe en el catálogo
+    const canon = brandCanon();
+    for (const item of incoming) {
+      const k = item.brand.toLocaleLowerCase("es-AR");
+      if (!k) continue;
+      if (canon.has(k)) item.brand = canon.get(k); else canon.set(k, item.brand);
+    }
     const next = products.map(p => ({ ...p }));
+    for (const p of next) { const k = String(p.brand || "").trim().toLocaleLowerCase("es-AR"); if (k && canon.has(k)) p.brand = canon.get(k); }
     const byCode = new Map(next.map(p => [p.code.toLocaleLowerCase("es-AR"), p]));
     const ids = new Set(next.map(p => p.id));
     let updated = 0, added = 0;
@@ -826,7 +843,7 @@ async function importPhotosZip(file) {
       if (!product) { unmatched.push(entry.name); continue; }
       jobs.set(product.id, { product, entry, ext, name: entry.name });   // si un artículo trae dos fotos, queda la última
     }
-    if (!jobs.size) throw new Error("Ninguna foto coincide con un código de artículo. Los archivos deben llamarse como el código (ej.: NAT-01.webp)." + (unmatched.length ? " Sin coincidencia: " + unmatched.slice(0, 10).join(", ") + (unmatched.length > 10 ? "…" : "") : ""));
+    if (!jobs.size) throw new Error("Ninguna foto coincide con un artículo cargado. Primero importá la planilla de precios (los artículos tienen que existir) y después subí el .zip; los archivos deben llamarse como el código (ej.: NAT-01.webp)." + (unmatched.length ? " Sin coincidencia: " + unmatched.slice(0, 10).join(", ") + (unmatched.length > 10 ? "…" : "") : ""));
 
     const list = [...jobs.values()], failed = [];
     let done = 0, next = 0;
