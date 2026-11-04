@@ -643,10 +643,18 @@ function sheetColumns(rows) {
         description: find("descripcion"),
         installment: find("redondeodecuota", "redondeodecuotaars", "cuotadiaria", "cuota"),
         plan: find("plandecuotas", "plan", "tipodeplan"),
+        published: find("precioenelsitio", "preciopublicadoensitio", "publicarprecio"),
         publishedPrice, referencePrice
       };
     }
   }
+  return null;
+}
+function parsePublished(v) {
+  const t = String(v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  if (!t) return null;
+  if (/^(no|0|false)\b/.test(t) || t.includes("no publicado") || t.includes("oculto")) return false;
+  if (/^(si|s|1|true|publicado|publicar)\b/.test(t)) return true;
   return null;
 }
 function sheetCell(row, index) {
@@ -692,7 +700,9 @@ async function importPriceWorkbook(file) {
         price: primary !== null ? primary : reference,
         installment: columns.installment >= 0 ? parseImportPrice(row[columns.installment]) : null,
         // texto como "90 cuotas", "Contado" o "210 cuotas (según marca)"; vacío o "(según marca)" = no cambia el plan
-        plan: columns.plan >= 0 && !/segun marca/i.test(String(row[columns.plan]).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) ? parsePlan(row[columns.plan]) : ""
+        plan: columns.plan >= 0 && !/segun marca/i.test(String(row[columns.plan]).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) ? parsePlan(row[columns.plan]) : "",
+        // "Precio en el sitio": Publicado / No publicado (vacío = no cambia; los artículos nuevos quedan sin publicar)
+        published: columns.published >= 0 ? parsePublished(row[columns.published]) : null
       });
     }
     if (!incoming.length) throw new Error("La hoja no contiene artículos para importar.");
@@ -726,6 +736,7 @@ async function importPriceWorkbook(file) {
         if (item.price !== null) product.price = item.price;
         if (item.installment !== null) product.installment = item.installment;
         if (item.plan) product.plan = item.plan;
+        if (item.published !== null) product.pricePublished = item.published && Number(product.price) > 0;
         updated++;
       } else {
         let id = slug(item.code), suffix = 2;
@@ -735,7 +746,7 @@ async function importPriceWorkbook(file) {
           category: item.category, brand: item.brand, description: item.description,
           // la foto se busca primero en el panel y, si no hay, en la carpeta /fotos/<id>.webp del sitio
           image: "/api/image/" + encodeURIComponent(id), visible: true, featured: false, price: item.price,
-          installment: item.installment, plan: item.plan || "", pricePublished: false
+          installment: item.installment, plan: item.plan || "", pricePublished: item.published === true && Number(item.price) > 0
         };
         next.push(product);
         ids.add(id);
@@ -781,6 +792,75 @@ $("#priceSheetFile").addEventListener("change", async e => {
   e.target.value = "";
   if (file) await importPriceWorkbook(file);
 });
+
+/* ---------- fotos en .zip: se asignan solas por código ---------- */
+const PHOTO_EXT = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", avif: "image/avif" };
+const photoKey = (t) => String(t).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+$("#uploadPhotosZip").addEventListener("click", () => $("#photosZipFile").click());
+$("#photosZipFile").addEventListener("change", async (e) => {
+  const file = e.target.files?.[0];
+  e.target.value = "";
+  if (file) await importPhotosZip(file);
+});
+async function importPhotosZip(file) {
+  const status = $("#photosStatus"), btn = $("#uploadPhotosZip");
+  const say = (msg, cls = "") => { status.hidden = false; status.className = "import-status " + cls; status.textContent = msg; };
+  btn.disabled = true;
+  try {
+    if (!window.JSZip) throw new Error("No se pudo cargar el lector de .zip. Revisá tu conexión e intentá de nuevo.");
+    if (file.size > 200 * 1024 * 1024) throw new Error("El .zip supera el límite de 200 MB.");
+    say("Leyendo el .zip…");
+    const zip = await JSZip.loadAsync(file);
+    // índice de artículos: por id y por código, sin importar mayúsculas, guiones o espacios
+    const index = new Map();
+    for (const p of products) { index.set(photoKey(p.id), p); index.set(photoKey(p.code), p); }
+    const jobs = new Map(), unmatched = [], skipped = [];
+    for (const entry of Object.values(zip.files)) {
+      if (entry.dir) continue;
+      const base = entry.name.split("/").pop();
+      if (!base || base.startsWith(".") || entry.name.startsWith("__MACOSX/")) continue;
+      const m = base.match(/^(.*)\.([A-Za-z0-9]+)$/);
+      const ext = m ? m[2].toLowerCase() : "";
+      if (!PHOTO_EXT[ext]) { skipped.push(base); continue; }
+      const product = index.get(photoKey(m[1]));
+      if (!product) { unmatched.push(entry.name); continue; }
+      jobs.set(product.id, { product, entry, ext, name: entry.name });   // si un artículo trae dos fotos, queda la última
+    }
+    if (!jobs.size) throw new Error("Ninguna foto coincide con un código de artículo. Los archivos deben llamarse como el código (ej.: NAT-01.webp)." + (unmatched.length ? " Sin coincidencia: " + unmatched.slice(0, 10).join(", ") + (unmatched.length > 10 ? "…" : "") : ""));
+
+    const list = [...jobs.values()], failed = [];
+    let done = 0, next = 0;
+    const worker = async () => {
+      while (next < list.length) {
+        const job = list[next++];
+        try {
+          const raw = await job.entry.async("blob");
+          const blob = await optimize(new File([raw], "foto." + job.ext, { type: PHOTO_EXT[job.ext] }));
+          if (blob.size > 5 * 1024 * 1024) throw new Error("supera los 5 MB");
+          const r = await api("image/" + encodeURIComponent(job.product.id), { method: "POST", raw: blob, type: blob.type || "image/webp" });
+          job.product.image = r.url;
+          job.product._file = null; job.product._preview = ""; job.product._clear = false;
+        } catch (err) { failed.push(`${job.name} (${err.message})`); }
+        done++;
+        say(`Subiendo fotos… ${done} de ${list.length}`);
+      }
+    };
+    await Promise.all([worker(), worker(), worker()]);
+
+    const ok = list.length - failed.length;
+    if (ok) { renderAll(); setDirty(true, "Fotos subidas; guardando artículos…"); await saveAll(); }
+    const saveFailed = $("#savebar").classList.contains("error");
+    const noPhoto = products.filter((p) => !jobs.has(p.id) && p.visible !== false && !p.image).length;
+    const lines = [`Fotos asignadas: ${ok} de ${list.length} archivo(s) con coincidencia.` + (saveFailed ? " Las fotos se subieron, pero no se pudieron guardar los artículos: " + $("#status").textContent : " Artículos guardados.")];
+    if (unmatched.length) lines.push(`Sin coincidencia (${unmatched.length}): ` + unmatched.slice(0, 15).join(", ") + (unmatched.length > 15 ? "…" : ""));
+    if (failed.length) lines.push(`No se pudieron subir (${failed.length}): ` + failed.slice(0, 10).join("; "));
+    if (skipped.length) lines.push(`Ignorados por no ser imagen (${skipped.length}).`);
+    if (noPhoto) lines.push(`${noPhoto} artículo(s) visible(s) siguen sin foto.`);
+    say(lines.join("\n"), saveFailed || failed.length ? "error" : unmatched.length ? "warning" : "success");
+  } catch (err) {
+    say("No se subieron las fotos: " + err.message, "error");
+  } finally { btn.disabled = false; }
+}
 
 /* ---------- guardar ---------- */
 $("#saveAll").addEventListener("click", saveAll);

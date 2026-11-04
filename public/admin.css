@@ -184,6 +184,7 @@ dialog form{padding:22px}
 .box h4{font-family:"Bjorn","Segoe UI",sans-serif;text-transform:uppercase;font-size:15px;margin:0 0 4px}
 .box p{margin:0 0 10px;font-size:13px}
 .box .box-note{margin:10px 0 0;font-weight:600}
+.photos-box{margin-bottom:16px}
 .box-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .sheet-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:20px}
 .sheet-col+.sheet-col{border-left:1px solid var(--line);padding-left:20px}

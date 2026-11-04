@@ -103,6 +103,17 @@
         </div>
       </section>
     </div>
+    <!-- FOTOS EN .ZIP -->
+    <section class="box photos-box" id="photosBox" aria-labelledby="photosTitle">
+      <h3 id="photosTitle">Fotos de artículos (.zip)</h3>
+      <p class="muted">Subí un .zip con las fotos (carpetas incluidas, JPG, PNG o WebP). Cada archivo se asigna solo al artículo cuyo código coincida con el nombre (ej.: <b>nat-01.webp</b> o <b>NAT-01.jpg</b> → artículo NAT-01), se optimiza a WebP y se guarda. No hace falta subirlas al repositorio ni una por una.</p>
+      <div class="box-actions">
+        <button class="btn dark" id="uploadPhotosZip" type="button">Subir fotos (.zip)</button>
+        <input id="photosZipFile" type="file" accept=".zip,application/zip" hidden>
+      </div>
+    </section>
+    <div id="photosStatus" class="import-status" role="status" aria-live="polite" hidden></div>
+
     <div id="priceImportStatus" class="import-status" role="status" aria-live="polite" hidden></div>
 
     <div class="filters">
@@ -246,6 +257,7 @@
 </dialog>
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="/admin.js"></script>
 </body>
 </html>
