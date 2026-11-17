@@ -88,7 +88,6 @@ async function load() {
 
 function renderLines() {
   const visible = all.filter(p => p.visible !== false);
-  const norm = v => String(v ?? "").trim().toLocaleLowerCase("es-AR");
   // el contador sale siempre del catálogo cargado: se actualiza solo al agregar, ocultar o quitar artículos
   const countOf = sec => visible.filter(p => norm(p.line) === norm(sec.name)).length;
   $("#lineButtons").innerHTML = sections.map(sec => `
@@ -124,12 +123,18 @@ function populate() {
   opts("#brandFilter", all.map(p => p.brand), "Marcas");
 }
 
+const norm = s => String(s ?? "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .toLowerCase()
+  .trim();
+
 function render() {
-  let q = $("#search").value.toLowerCase();
+  let q = norm($("#search").value);
 
   let list = all.filter(p =>
     p.visible !== false &&
-    (!q || [p.code, p.name, p.brand, p.description].join(" ").toLowerCase().includes(q)) &&
+    (!q || norm([p.code, p.name, p.brand, p.description, p.category].join(" ")).includes(q)) &&
     (!$("#lineFilter").value || p.line === $("#lineFilter").value) &&
     (!$("#categoryFilter").value || p.category === $("#categoryFilter").value) &&
     (!$("#brandFilter").value || p.brand === $("#brandFilter").value)
